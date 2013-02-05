@@ -1,5 +1,5 @@
 package Catmandu::AlephX::Find;
-use Catmandu::Sane;
+use Catmandu::AlephX::Sane;
 use Moo;
 
 extends('Catmandu::AlephX::Response');

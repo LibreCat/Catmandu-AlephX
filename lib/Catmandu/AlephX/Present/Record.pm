@@ -1,5 +1,6 @@
 package Catmandu::AlephX::Present::Record;
-use Catmandu::Util qw(:is :check);
+use Catmandu::AlephX::Sane;
+use Data::Util qw(:check :validate);
 use Moo;
 
 extends 'Catmandu::AlephX::FindDoc::Record';

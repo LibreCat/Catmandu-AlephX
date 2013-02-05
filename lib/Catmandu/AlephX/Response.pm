@@ -1,4 +1,5 @@
 package Catmandu::AlephX::Response;
+use Catmandu::AlephX::Sane;
 use Moo;
 use Data::Util qw(:validate :check);
 

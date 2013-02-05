@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 use lib qw(/home/njfranck/Catmandu-AlephX/lib);
-use Catmandu::Sane;
+use Catmandu::AlephX::Sane;
 use Catmandu::AlephX;
 use Data::Dumper;
 use open qw(:std :utf8);

@@ -1,5 +1,5 @@
 package Catmandu::AlephX::IllGetDocShort;
-use Catmandu::Sane;
+use Catmandu::AlephX::Sane;
 use Data::Util qw(:check :validate);
 use Moo;
 

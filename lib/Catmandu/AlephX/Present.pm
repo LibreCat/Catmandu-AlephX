@@ -1,5 +1,5 @@
 package Catmandu::AlephX::Present;
-use Catmandu::Sane;
+use Catmandu::AlephX::Sane;
 use Moo;
 use Catmandu::AlephX::Metadata;
 use Catmandu::AlephX::Present::Record;

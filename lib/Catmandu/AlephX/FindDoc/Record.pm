@@ -1,4 +1,5 @@
 package Catmandu::AlephX::FindDoc::Record;
+use Catmandu::AlephX::Sane;
 use Data::Util qw(:validate);
 use Moo;
 use Catmandu::AlephX::Metadata;

@@ -1,5 +1,5 @@
 package Catmandu::AlephX;
-use Catmandu::Sane;
+use Catmandu::AlephX::Sane;
 use Moo;
 use LWP::UserAgent;
 use XML::Simple;
@@ -23,7 +23,7 @@ has _web => (
   lazy => 1,
   default => sub {
     LWP::UserAgent->new(
-      cookie_jar => {},ssl_opts => { verify_hostname => 0 }
+      cookie_jar => {}
     );
   }
 );

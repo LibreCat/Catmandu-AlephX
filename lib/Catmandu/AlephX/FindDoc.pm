@@ -1,5 +1,5 @@
 package Catmandu::AlephX::FindDoc;
-use Catmandu::Sane;
+use Catmandu::AlephX::Sane;
 use Moo;
 use Catmandu::AlephX::Metadata;
 use Catmandu::AlephX::FindDoc::Record;
