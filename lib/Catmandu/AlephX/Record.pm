@@ -1,4 +1,4 @@
-package Catmandu::AlephX::FindDoc::Record;
+package Catmandu::AlephX::Record;
 use Catmandu::AlephX::Sane;
 use Data::Util qw(:validate);
 use Moo;

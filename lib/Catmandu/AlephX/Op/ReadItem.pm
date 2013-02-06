@@ -1,11 +1,11 @@
-package Catmandu::AlephX::ItemData;
+package Catmandu::AlephX::Op::ReadItem;
 use Catmandu::AlephX::Sane;
 use Data::Util qw(:check :validate);
 use Moo;
 
-extends('Catmandu::AlephX::Response');
+with('Catmandu::AlephX::Response');
 
-has item => (
+has z30 => (
   is => 'ro',
   lazy => 1,
   isa => sub{
@@ -17,8 +17,9 @@ has item => (
   },
   default => sub {
     my $self = $_[0];
-    $self->data()->{item} // [];
+    $self->data()->{z30} // [];
   }
-); 
+);
+sub op { 'read-item' } 
 
 1;

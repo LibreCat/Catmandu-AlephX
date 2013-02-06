@@ -1,16 +1,16 @@
-package Catmandu::AlephX::Present;
+package Catmandu::AlephX::Op::FindDoc;
 use Catmandu::AlephX::Sane;
 use Moo;
 use Catmandu::AlephX::Metadata;
-use Catmandu::AlephX::Present::Record;
+use Catmandu::AlephX::Record;
 
-extends('Catmandu::AlephX::Response');
+with('Catmandu::AlephX::Response');
 
 has record => (
   is => 'ro',
   lazy => 1,
-  default => sub {
-    my $self = shift;
+  default => sub { 
+    my $self = $_[0];
     my $rs = $self->data->{record};
     my @record = ();
     for my $r(@$rs){
@@ -20,14 +20,10 @@ has record => (
           type => $type,data => $r->{metadata}->[0]->{$type}->[0]
         );
       }
-      push @record,Catmandu::AlephX::Present::Record->new(
-        metadata => \@metadata,
-        record_header => $r->{record_header}->[0],
-        doc_number => $r->{doc_number}->[0]
-      );
+      push @record,Catmandu::AlephX::Record->new(metadata => \@metadata);
     }
     \@record;
   }
 );
-
+sub op { 'find-doc' }
 1;

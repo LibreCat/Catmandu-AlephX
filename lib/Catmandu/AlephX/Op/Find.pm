@@ -1,8 +1,8 @@
-package Catmandu::AlephX::Find;
+package Catmandu::AlephX::Op::Find;
 use Catmandu::AlephX::Sane;
 use Moo;
 
-extends('Catmandu::AlephX::Response');
+with('Catmandu::AlephX::Response');
 
 #'set_number' == id waaronder zoekactie wordt opgeslagen door Aleph (kan je later hergebruiken)
 has set_number => (
@@ -20,5 +20,6 @@ has no_entries => (
   lazy => 1,
   default => sub { $_[0]->data->{no_entries}->[0]; }
 );
+sub op { 'find' }
 
 1;

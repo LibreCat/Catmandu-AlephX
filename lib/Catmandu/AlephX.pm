@@ -6,12 +6,12 @@ use XML::Simple;
 use URI::Escape;
 use Data::Util qw(:check :validate);
 
-use Catmandu::AlephX::ItemData;
-use Catmandu::AlephX::ReadItem;
-use Catmandu::AlephX::Find;
-use Catmandu::AlephX::FindDoc;
-use Catmandu::AlephX::Present;
-use Catmandu::AlephX::IllGetDocShort;
+use Catmandu::AlephX::Op::ItemData;
+use Catmandu::AlephX::Op::ReadItem;
+use Catmandu::AlephX::Op::Find;
+use Catmandu::AlephX::Op::FindDoc;
+use Catmandu::AlephX::Op::Present;
+use Catmandu::AlephX::Op::IllGetDocShort;
 
 has url => (
   is => 'ro',
@@ -92,169 +92,9 @@ sub _get {
   my $query = _construct_query($data) || "";
   $self->_web->get($self->url."?$query");
 }
-=head1 METHODS
-
-=cut
-
-=head2 item-data
-  
-The service retrieves the document number from the user.
-For each of the document's items it retrieves:
-  Item information (From Z30).
-  Loan information (from Z36).
-  An indication whether the request is on-hold
-
-
-  my $item_data = $aleph->item_data(base => "rug01",doc_number => "001484477");
-  if($item_data->is_success){
-    for my $item(@{ $item_data->item() }){
-      print Dumper($item);
-    };
-  }else{
-    print STDERR $item_data->error."\n";
-  }
-
-This method is equivalent to 'op' = 'item-data'
-
-=cut
-sub item_data {
-  my($self,%args)=@_;
-  $args{'op'} = "item-data";
-  my $res = $self->_do_web_request(\%args);
-  my $data = $self->_from_xml($res->content);
-  Catmandu::AlephX::ItemData->new(data => $data);    
-}
-
-=head2 read_item
-
-The service retrieves a requested item's record from a given ADM library in case such an item does exist in that ADM library.
-
-
-  my $readitem = $aleph->read_item(library=>"usm50",item_barcode=>293);
-  if($readitem->is_success){
-    for my $z30(@{ $readitem->z30 }){
-      print Dumper($z30);
-    }
-  }else{
-    say STDERR $readitem->error;
-  }
-
-This method is equivalent to 'op' = 'read-item'
-
-=cut
-
-sub read_item {
-  my($self,%args)=@_;
-  $args{'op'} = "read-item";
-  my $res = $self->_do_web_request(\%args);
-  my $data = $self->_from_xml($res->content);
-  Catmandu::AlephX::ReadItem->new(data => $data);    
-}
-
-=head2 find
-
-This service retrieves a set number and the number of records answering a search request inserted by the user.
-
-
-  my $find = $aleph->find(request => 'wrd=(art)',base=>'rug01');
-  if($find->is_success){
-    say "set_number: ".$find->set_number;
-    say "no_records: ".$find->no_records;
-    say "no_entries: ".$find->no_entries;
-  }else{
-    say STDERR $find->error;
-  }
-
-This method is equivalent to 'op' = 'find'
-
-=cut
-sub find {
-  my($self,%args)=@_;
-  $args{op} = 'find';
-  my $res = $self->_do_web_request(\%args);
-  my $data = $self->_from_xml($res->content);
-  Catmandu::AlephX::Find->new(data => $data);    
-}
-
-=head2 find_doc
-
-This service retrieves the OAI XML format of an expanded document as given by the user.
-
-  my $find = $aleph->find_doc(base=>'rug01',doc_num=>'000000444',format=>'marc');
-  if($find->is_success){
-    for my $record(@{ $find->record }){
-      say Dumper($record);
-    }
-  }else{
-    say STDERR $find->error;
-  }
-
-This method is equivalent to 'op' = 'find-doc'
-
-=cut
-sub find_doc {
-  my($self,%args)=@_;
-  $args{op} = 'find-doc';
-  my $res = $self->_do_web_request(\%args);
-  my $data = $self->_from_xml($res->content);
-  Catmandu::AlephX::FindDoc->new(data => $data);    
-}
-
-=head2 present
-
-This service retrieves OAI XML format of expanded documents.
-You can view documents according to the locations within a specific set number.
-
-  my $set_number = $aleph->find(request => "wrd=(BIB.AFF)",base => "rug01")->set_number;
-  my $present = $aleph->present(
-    set_number => $set_number,
-    set_entry => "000000001-000000003"
-  );
-  if($present->is_success){
-    say "doc_number: ".$record->{doc_number};
-    for my $metadata(@{ $record->metadata }){
-      say "\tmetadata: ".$metadata->type;
-    }
-  }else{
-    say STDERR $present->error;
-  }
-
-=cut
-sub present {
-  my($self,%args)=@_;
-  $args{op} = 'present';
-  my $res = $self->_do_web_request(\%args);
-  my $data = $self->_from_xml($res->content);
-  Catmandu::AlephX::Present->new(data => $data);    
-}
-
-=head2 ill_get_doc_short
-
-The service retrieves the doc number and the XML of the short document (Z13).
-
-
-  my $result = $aleph->ill_get_doc_short(doc_number => "000000001",library=>"usm01");
-  if($result->is_success){
-    for my $z30(@{ $result->z13 }){
-      print Dumper($z30);
-    }
-  }else{
-    say STDERR $result->error;
-  }
-
-
-This method is equivalent to 'op' = 'ill-get-doc-short'
-=cut
-sub ill_get_doc_short {
-  my($self,%args)=@_;
-  $args{op} = 'ill-get-doc-short';
-  my $res = $self->_do_web_request(\%args);
-  my $data = $self->_from_xml($res->content);
-  Catmandu::AlephX::IllGetDocShort->new(data => $data);    
-}
 =head1 NAME
 
-Catmandu::AlephX - Low level client for Aleph X-Services
+  Catmandu::AlephX - Low level client for Aleph X-Services
 
 =head1 SYNOPSIS
 
@@ -276,6 +116,198 @@ Catmandu::AlephX - Low level client for Aleph X-Services
 
   }
 
+=head1 METHODS
+
+=head2 item-data
+ 
+=head3 documentation from AlephX
+ 
+The service retrieves the document number from the user.
+For each of the document's items it retrieves:
+  Item information (From Z30).
+  Loan information (from Z36).
+  An indication whether the request is on-hold
+
+=head3 example
+
+  my $item_data = $aleph->item_data(base => "rug01",doc_number => "001484477");
+  if($item_data->is_success){
+    for my $item(@{ $item_data->item() }){
+      print Dumper($item);
+    };
+  }else{
+    print STDERR $item_data->error."\n";
+  }
+
+=head3 remarks
+  
+  This method is equivalent to 'op' = 'item-data'
+
+=cut
+sub item_data {
+  my($self,%args)=@_;
+  $args{'op'} = "item-data";
+  my $res = $self->_do_web_request(\%args);
+  my $data = $self->_from_xml($res->content);
+  Catmandu::AlephX::Op::ItemData->new(data => $data);    
+}
+
+=head2 read_item
+
+=head3 documentation from AlephX
+
+  The service retrieves a requested item's record from a given ADM library in case such an item does exist in that ADM library.
+
+=head3 example
+
+  my $readitem = $aleph->read_item(library=>"usm50",item_barcode=>293);
+  if($readitem->is_success){
+    for my $z30(@{ $readitem->z30 }){
+      print Dumper($z30);
+    }
+  }else{
+    say STDERR $readitem->error;
+  }
+
+=head3 remarks
+
+  This method is equivalent to 'op' = 'read-item'
+
+=cut
+
+sub read_item {
+  my($self,%args)=@_;
+  $args{'op'} = "read-item";
+  my $res = $self->_do_web_request(\%args);
+  my $data = $self->_from_xml($res->content);
+  Catmandu::AlephX::Op::ReadItem->new(data => $data);    
+}
+
+=head2 find
+
+=head3 documentation from Aleph X
+  
+  This service retrieves a set number and the number of records answering a search request inserted by the user.
+
+=head3 example
+  
+  my $find = $aleph->find(request => 'wrd=(art)',base=>'rug01');
+  if($find->is_success){
+    say "set_number: ".$find->set_number;
+    say "no_records: ".$find->no_records;
+    say "no_entries: ".$find->no_entries;
+  }else{
+    say STDERR $find->error;
+  }
+
+=head3 remarks
+
+  This method is equivalent to 'op' = 'find'
+
+=cut
+sub find {
+  my($self,%args)=@_;
+  $args{op} = 'find';
+  my $res = $self->_do_web_request(\%args);
+  my $data = $self->_from_xml($res->content);
+  Catmandu::AlephX::Op::Find->new(data => $data);    
+}
+
+=head2 find_doc
+
+=head3 documentation from AlephX
+  
+  This service retrieves the OAI XML format of an expanded document as given by the user.
+
+=head3 example
+
+  my $find = $aleph->find_doc(base=>'rug01',doc_num=>'000000444',format=>'marc');
+  if($find->is_success){
+    for my $record(@{ $find->record }){
+      say Dumper($record);
+    }
+  }else{
+    say STDERR $find->error;
+  }
+
+=head3 remarks
+
+  This method is equivalent to 'op' = 'find-doc'
+
+=cut
+sub find_doc {
+  my($self,%args)=@_;
+  $args{op} = 'find-doc';
+  my $res = $self->_do_web_request(\%args);
+  my $data = $self->_from_xml($res->content);
+  Catmandu::AlephX::Op::FindDoc->new(data => $data);    
+}
+
+=head2 present
+
+=head3 documentation from Aleph X
+
+  This service retrieves OAI XML format of expanded documents.
+  You can view documents according to the locations within a specific set number.
+
+=head3 example
+
+  my $set_number = $aleph->find(request => "wrd=(BIB.AFF)",base => "rug01")->set_number;
+  my $present = $aleph->present(
+    set_number => $set_number,
+    set_entry => "000000001-000000003"
+  );
+  if($present->is_success){
+    say "doc_number: ".$record->{doc_number};
+    for my $metadata(@{ $record->metadata }){
+      say "\tmetadata: ".$metadata->type;
+    }
+  }else{
+    say STDERR $present->error;
+  }
+
+=head3 remarks
+
+  This method is equivalent to 'op' = 'present'
+
+=cut
+sub present {
+  my($self,%args)=@_;
+  $args{op} = 'present';
+  my $res = $self->_do_web_request(\%args);
+  my $data = $self->_from_xml($res->content);
+  Catmandu::AlephX::Op::Present->new(data => $data);    
+}
+
+=head2 ill_get_doc_short
+
+=head3 documentation from Aleph X
+
+  The service retrieves the doc number and the XML of the short document (Z13).
+
+=head3 example
+
+  my $result = $aleph->ill_get_doc_short(doc_number => "000000001",library=>"usm01");
+  if($result->is_success){
+    for my $z30(@{ $result->z13 }){
+      print Dumper($z30);
+    }
+  }else{
+    say STDERR $result->error;
+  }
+
+=head3 remarks
+
+  This method is equivalent to 'op' = 'ill-get-doc-short'
+
+=cut
+sub ill_get_doc_short {
+  my($self,%args)=@_;
+  $args{op} = 'ill-get-doc-short';
+  my $res = $self->_do_web_request(\%args);
+  my $data = $self->_from_xml($res->content);
+  Catmandu::AlephX::Op::IllGetDocShort->new(data => $data);    
+}
 =head1 AUTHOR
 
 Nicolas Franck, C<< <nicolas.franck at ugent.be> >>

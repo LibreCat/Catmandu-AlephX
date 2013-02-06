@@ -20,7 +20,7 @@ sub import {
 
 =head1 NAME
 
-Catmandu::AlephX::Sane - Sensible package boilerplate, copy of Catmandu::AlephX::Sane
+Catmandu::AlephX::Sane - Sensible package boilerplate, copy of Catmandu::Sane
 
 =head1 SYNOPSIS
 
@@ -36,6 +36,6 @@ Sensible package boilerplate equivalent to:
     use Carp qw(confess);
     use utf8;
 
-This package is a copy of Catmandu::AlephX::Sane from the cpan module Catmandu
+This package is a copy of Catmandu::Sane from the cpan module Catmandu
 
 =cut
