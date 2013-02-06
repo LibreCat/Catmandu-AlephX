@@ -38,4 +38,8 @@ Sensible package boilerplate equivalent to:
 
 This package is a copy of Catmandu::Sane from the cpan module Catmandu
 
+=head1 AUTHOR
+
+Nicolas Steenlant, C<< <nicolas.steenlant at ugent.be> >>
+
 =cut

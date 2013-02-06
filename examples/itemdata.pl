@@ -1,5 +1,6 @@
 #!/usr/bin/env perl
-use lib qw(/home/njfranck/Catmandu-AlephX/lib);
+use FindBin;
+use lib "$FindBin::Bin/../lib";
 use Catmandu::AlephX::Sane;
 use Catmandu::AlephX;
 use Data::Dumper;
