@@ -1,15 +1,12 @@
 #!include_default
 # Avoid configuration metadata file
-^MYMETA\.
+MYMETA\.
 
 # Avoid Module::Build generated and utility files.
-\bBuild$
-\bBuild.bat$
-\b_build
-\bBuild.COM$
-\bBUILD.COM$
-\bbuild.com$
-^MANIFEST\.SKIP
-
-# Avoid archives of this distribution
-\bLow level api for Aleph X Services-[\d\.\_]+
+Build
+Build.bat
+_build
+Build.COM
+BUILD.COM
+build.com
+MANIFEST\.SKIP
