@@ -59,6 +59,6 @@ has data => (
   required => 1,
   isa => sub { hash_ref($_[0]); }
 );
-sub is_success { return !defined($_[0]->error); }
+sub is_success { return !is_string($_[0]->error); }
 
 1;

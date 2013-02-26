@@ -12,6 +12,9 @@ use Catmandu::AlephX::Op::Find;
 use Catmandu::AlephX::Op::FindDoc;
 use Catmandu::AlephX::Op::Present;
 use Catmandu::AlephX::Op::IllGetDocShort;
+use Catmandu::AlephX::Op::BorAuth;
+use Catmandu::AlephX::Op::BorInfo;
+
 
 has url => (
   is => 'ro',
@@ -308,6 +311,32 @@ sub ill_get_doc_short {
   my $data = $self->_from_xml($res->content);
   Catmandu::AlephX::Op::IllGetDocShort->new(data => $data);    
 }
+=head2 bor_auth
+
+=head3 documentation from Aleph X
+
+  This service retrieves the Global record (Z303), Local record (Z305) and the Data record (Z304) for a given Patron if the given ID and verification code match.
+  Otherwise, an error message is returned.
+
+=head3 example
+
+=cut
+sub bor_auth {
+  my($self,%args)=@_;
+  $args{op} = 'bor-auth';
+  my $res = $self->_do_web_request(\%args);
+  my $data = $self->_from_xml($res->content);
+  Catmandu::AlephX::Op::BorAuth->new(data => $data);
+} 
+
+sub bor_info {
+  my($self,%args)=@_;
+  $args{op} = 'bor-info';
+  my $res = $self->_do_web_request(\%args);
+  my $data = $self->_from_xml($res->content);
+  Catmandu::AlephX::Op::BorInfo->new(data => $data);
+}
+
 =head1 AUTHOR
 
 Nicolas Franck, C<< <nicolas.franck at ugent.be> >>
