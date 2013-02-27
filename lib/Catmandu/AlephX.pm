@@ -14,7 +14,7 @@ use Catmandu::AlephX::Op::Present;
 use Catmandu::AlephX::Op::IllGetDocShort;
 use Catmandu::AlephX::Op::BorAuth;
 use Catmandu::AlephX::Op::BorInfo;
-
+use Catmandu::AlephX::Op::IllBorInfo;
 
 has url => (
   is => 'ro',
@@ -33,11 +33,20 @@ has _web => (
 has _xml_parser => (
   is => 'ro',
   lazy => 1,
-  default => sub { XML::Simple->new(); }
+  default => sub { 
+    XML::Simple->new(
+      #force every element into an array
+      ForceArray => 1,
+      #ignores attributes
+      NoAttr => 1,
+      #when not set, empty elements result in empty hashes
+      SuppressEmpty => 1
+    ); 
+  }
 );
 sub _from_xml {
   my($self,$data)=@_;
-  $self->_xml_parser->XMLin($data,ForceArray => 1);
+  $self->_xml_parser->XMLin($data);
 }
 sub _validate_web_response {
   my($res) = @_;
@@ -55,6 +64,7 @@ sub _do_web_request {
     confess "method $method not supported";
   }
   _validate_web_response($res);
+  #print $res->content();
   $res;
 }
 sub _post {
@@ -320,6 +330,28 @@ sub ill_get_doc_short {
 
 =head3 example
 
+  my %args = (
+    library => $library,
+    bor_id => $bor_id,
+    verification => $verification
+  );
+  my $auth = $aleph->bor_auth(%args);
+
+  if($auth->is_success){
+
+    for my $type(qw(z303 z304 z305)){
+      say "$type:";
+      my $data = $auth->$type();
+      for my $key(keys %$data){
+        say "\t$key : $data->{$key}->[0]";
+      }
+    }
+
+  }else{
+    say STDERR "error: ".$auth->error;
+    exit 1;
+  }
+
 =cut
 sub bor_auth {
   my($self,%args)=@_;
@@ -328,7 +360,51 @@ sub bor_auth {
   my $data = $self->_from_xml($res->content);
   Catmandu::AlephX::Op::BorAuth->new(data => $data);
 } 
+=head2 bor_info
 
+=head3 documentation from Aleph X
+
+  This service retrieves all information related to a given Patron: Global and Local records, Loan records, Loaned items records, Short doc record, Cash record, and so on, if the ID and verification code provided match.
+
+  If not, an error message is returned. Since the bor-info X-Service retrieves a very large amount of data, and not all of it may be relevant, you can choose to receive a part of the data, based on your needs.
+
+=head3 example
+    
+  my %args = (
+    library => $library,
+    bor_id => $bor_id,
+    verification => $verification,
+    loans => 'P'
+  );
+  my $info = $aleph->bor_info(%args);
+
+  if($info->is_success){
+
+    for my $type(qw(z303 z304 z305)){
+      say "$type:";
+      my $data = $info->$type();
+      for my $key(keys %$data){
+        say "\t$key : $data->{$key}->[0]";
+      }
+    }
+    say "fine:";
+    for my $fine(@{ $info->fine() }){
+      for my $type(qw(z13 z30 z31)){
+        say "\t$type:";
+        my $data = $fine->{$type}->[0];
+        for my $key(keys %$data){
+          say "\t\t$key : $data->{$key}->[0]";
+        }
+      }
+    }
+    say "due_date: ".$info->due_date();
+
+  }else{
+    say STDERR "error: ".$info->error;
+    exit 1;
+  }
+
+=cut
 sub bor_info {
   my($self,%args)=@_;
   $args{op} = 'bor-info';
@@ -337,6 +413,22 @@ sub bor_info {
   Catmandu::AlephX::Op::BorInfo->new(data => $data);
 }
 
+=head2 ill_bor_info
+
+=head3 documentation from Aleph X
+
+  This service retrieves Z303, Z304, Z305 and Z308 records for a given borrower ID / barcode.
+
+=head3 example
+
+=cut
+sub ill_bor_info {
+  my($self,%args)=@_;
+  $args{op} = 'ill-bor-info';
+  my $res = $self->_do_web_request(\%args);
+  my $data = $self->_from_xml($res->content);
+  Catmandu::AlephX::Op::IllBorInfo->new(data => $data);
+}
 =head1 AUTHOR
 
 Nicolas Franck, C<< <nicolas.franck at ugent.be> >>

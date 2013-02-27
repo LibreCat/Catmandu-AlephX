@@ -9,15 +9,13 @@ has item => (
   is => 'ro',
   lazy => 1,
   isa => sub{
-    my $item = $_[0];
-    array_ref($item);
-    for(@$item){
+    array_ref($_[0]);
+    for(@{ $_[0] }){
       hash_ref($_);
     }
   },
   default => sub {
-    my $self = $_[0];
-    $self->data()->{item} // [];
+    $_[0]->data()->{item} // [];
   }
 ); 
 sub op { 'item-data' }

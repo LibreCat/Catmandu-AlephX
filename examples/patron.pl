@@ -3,6 +3,7 @@ use FindBin;
 use lib "$FindBin::Bin/../lib";
 use Catmandu::AlephX::Sane;
 use Catmandu::AlephX;
+use Data::Dumper;
 use open qw(:std :utf8);
 
 sub read_str {
@@ -22,7 +23,7 @@ sub read_password {
 
 my $aleph = Catmandu::AlephX->new(url => "http://aleph.ugent.be/X");
 
-my $file = "-";
+my $file;
 my($library,$bor_id,$verification);
 
 print "library: ";
@@ -36,6 +37,9 @@ $verification = read_password();
 
 print "file: ";
 $file = read_str();
+
+say "file is '$file'";
+
 $file = "/dev/stdout" if $file eq "-";
 
 open STDOUT,">:utf8",$file or die($!);
@@ -43,31 +47,27 @@ open STDOUT,">:utf8",$file or die($!);
 my %args = (
   library => $library,
   bor_id => $bor_id,
-  verification => $verification,
-  loans => 'P'
+  verification => $verification
 );
 my $info = $aleph->bor_info(%args);
 if($info->is_success){
 
-  for my $type(qw(z303 z304 z305)){
-    say "$type:";
-    my $data = $info->$type();
-    for my $key(keys %$data){
-      say "\t$key : $data->{$key}->[0]";
-    }
-  }
-  say "fine:";
-  for my $fine(@{ $info->fine() }){
-    for my $type(qw(z13 z30 z31)){
-      say "\t$type:";
-      my $data = $fine->{$type}->[0];
-      for my $key(keys %$data){
-        say "\t\t$key : $data->{$key}->[0]";
-      }
-    }          
-  }
-  say "due_date: ".$info->due_date();
+  my $z304 = $info->z304();
+  my @keys = qw(z304-address-0 z304-address-1 z304-address-2 z304-address-3 z304-address-4 z304-email-address z304-date-from z304-date-to z304-zip z304-telephone z304-telephone-1 z304-telephone-2 z304-telephone-3 z304-telephone-4);
 
+  for my $key(@keys){
+    my $val = $z304->{$key}->[0] // "<not defined>";
+    say sprintf("\t%20s : %s",$key,$val);
+  }
+
+  my $z305 = $info->z305();
+  @keys = qw(z305-no-cash z305-no-hold z305-no-loan z305-no-photo);
+  for my $key(@keys){
+    my $val = $z305->{$key}->[0] // "<not defined>";
+    say sprintf("\t%20s : %s",$key,$val);
+  }
+
+  
 }else{
   say STDERR "error: ".$info->error;
   exit 1;
