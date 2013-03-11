@@ -6,20 +6,25 @@ with('Catmandu::AlephX::Response');
 
 #'set_number' == id waaronder zoekactie wordt opgeslagen door Aleph (kan je later hergebruiken)
 has set_number => (
-  is => 'ro',
-  lazy => 1,
-  default => sub { $_[0]->data->{set_number}->[0]; }
+  is => 'ro'
 );
 has no_records => (
-  is => 'ro',
-  lazy => 1,
-  default => sub { $_[0]->data->{no_records}->[0]; }
+  is => 'ro'
 );
 has no_entries => (
   is => 'ro',
-  lazy => 1,
-  default => sub { $_[0]->data->{no_entries}->[0]; }
 );
 sub op { 'find' }
+
+sub parse {
+  my($class,$xpath) = @_;
+  __PACKAGE__->new(
+    error => $xpath->findvalue('/find/error')->value(),
+    session_id => $xpath->findvalue('/find/session-id')->value(),
+    set_number => $xpath->findvalue('/find/set_number')->value(),
+    no_records => $xpath->findvalue('/find/no_records')->value(),
+    no_entries => $xpath->findvalue('/find/no_entries')->value()
+  ); 
+}
 
 1;

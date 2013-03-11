@@ -3,12 +3,6 @@ use Catmandu::AlephX::Sane;
 use Moo::Role;
 use Data::Util qw(:validate :check);
 
-sub BUILD {
-  my $self = $_[0];
-  $self->error($self->data()->{error}->[0]);
-  $self->session_id($self->data()->{'session-id'}->[0]);
-}
-
 =head1 NAME
 
   Catmandu::AlephX::Response - base class for xml-responses from the AlephX-server
@@ -54,11 +48,6 @@ sub BUILD {
 requires 'op';
 has error => (is => 'rw');
 has session_id => (is => 'rw');
-has data => (
-  is => 'ro',
-  required => 1,
-  isa => sub { hash_ref($_[0]); }
-);
 sub is_success { return !is_string($_[0]->error); }
 
 1;

@@ -4,6 +4,7 @@ use lib "$FindBin::Bin/../lib";
 use Catmandu::AlephX::Sane;
 use Catmandu::AlephX;
 use open qw(:std :utf8);
+use Data::Dumper;
 
 sub read_str {
   my $line = <STDIN>;
@@ -53,20 +54,23 @@ if($info->is_success){
     say "$type:";
     my $data = $info->$type();
     for my $key(keys %$data){
-      say "\t$key : $data->{$key}->[0]";
+      say "\tkey: $key";
+      say "\t$key : $data->{$key}->[0]" if scalar(@{ $data->{$key} });
     }
   }
+  exit;
   say "fine:";
   for my $fine(@{ $info->fine() }){
     for my $type(qw(z13 z30 z31)){
       say "\t$type:";
+      say "\tkey: $type";
+
       my $data = $fine->{$type}->[0];
       for my $key(keys %$data){
-        say "\t\t$key : $data->{$key}->[0]";
+        say "\t\t$key : $data->{$key}->[0]" if scalar(@{ $data->{$key} });
       }
     }          
   }
-  say "due_date: ".$info->due_date();
 
 }else{
   say STDERR "error: ".$info->error;

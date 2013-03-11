@@ -10,9 +10,7 @@ my $aleph = Catmandu::AlephX->new(url => "http://aleph.ugent.be/X");
 
 my $result = $aleph->ill_get_doc_short(doc_number => "000000001",library=>"usm01");
 if($result->is_success){
-  for my $z30(@{ $result->z13 }){
-    print Dumper($z30);
-  }
+  print Dumper($result->z13);
 }else{
   say STDERR $result->error;
 } 

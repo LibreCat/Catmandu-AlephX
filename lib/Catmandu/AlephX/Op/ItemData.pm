@@ -2,10 +2,11 @@ package Catmandu::AlephX::Op::ItemData;
 use Catmandu::AlephX::Sane;
 use Data::Util qw(:check :validate);
 use Moo;
+use Catmandu::AlephX::XPath::Helper;
 
 with('Catmandu::AlephX::Response');
 
-has item => (
+has items => (
   is => 'ro',
   lazy => 1,
   isa => sub{
@@ -15,9 +16,23 @@ has item => (
     }
   },
   default => sub {
-    $_[0]->data()->{item} // [];
+    [];
   }
 ); 
 sub op { 'item-data' }
+
+sub parse {
+  my($class,$xpath)=@_;
+  my @items;
+
+  for my $item($xpath->find('/item-data/item')->get_nodelist()){
+    push @items,Catmandu::AlephX::XPath::Helper->get_children($item);
+  }
+  __PACKAGE__->new(
+    session_id => $xpath->findvalue('/item-data/session-id')->value(),
+    error => $xpath->findvalue('/item-data/error')->value(),
+    items => \@items
+  );
+} 
 
 1;
