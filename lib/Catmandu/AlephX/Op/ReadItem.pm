@@ -2,6 +2,7 @@ package Catmandu::AlephX::Op::ReadItem;
 use Catmandu::AlephX::Sane;
 use Data::Util qw(:check :validate);
 use Moo;
+use Catmandu::AlephX::XPath::Helper qw(:all);
 
 with('Catmandu::AlephX::Response');
 
@@ -15,9 +16,25 @@ has z30 => (
     }
   },
   default => sub {
-    $_[0]->data()->{z30} // [];
+    [];
   }
 );
 sub op { 'read-item' } 
+
+sub parse {
+  my($class,$xpath) = @_;
+
+  my @z30;
+
+  for my $z($xpath->find('/read-item/z30')->get_nodelist()){
+    push @z30,get_children($z);
+  }    
+
+  __PACKAGE__->new(
+    session_id => $xpath->findvalue('/read-item/session-id')->value(),
+    error => $xpath->findvalue('/read-item/error')->value(),
+    z30 => \@z30
+  );
+}
 
 1;

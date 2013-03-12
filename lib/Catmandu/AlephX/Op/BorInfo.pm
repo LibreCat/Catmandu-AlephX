@@ -2,6 +2,7 @@ package Catmandu::AlephX::Op::BorInfo;
 use Catmandu::AlephX::Sane;
 use Data::Util qw(:check :validate);
 use Moo;
+use Catmandu::AlephX::XPath::Helper qw(:all);
 
 extends('Catmandu::AlephX::Op::BorAuth');
 with('Catmandu::AlephX::Response');
@@ -11,8 +12,7 @@ has item_l => (
   lazy => 1,
   isa => sub { array_ref($_[0]); },
   default => sub {
-    my $l = $_[0]->data()->{item_l};
-    is_array_ref($l) ? $l : [];
+    []
   }
 );
 has item_h => (
@@ -20,26 +20,15 @@ has item_h => (
   lazy => 1,
   isa => sub { array_ref($_[0]); },  
   default => sub {
-    my $h = $_[0]->data()->{item_h};
-    is_array_ref($h) ? $h : [];
+    []
   }
 );
 
 has balance => ( 
-  is => 'ro',
-  lazy => 1,
-  default => sub {
-    my $b = $_[0]->data()->{balance};
-    is_array_ref($b) ? $b->[0] : undef;
-  }
+  is => 'ro'
 );
 has sign => ( 
-  is => 'ro',
-  lazy => 1,
-  default => sub {
-    my $s = $_[0]->data()->{balance};
-    is_array_ref($s) ? $s->[0] : undef;
-  }
+  is => 'ro'
 );
 has fine => (
   is => 'ro',
@@ -48,27 +37,66 @@ has fine => (
     array_ref($_[0]);
   },
   default => sub {
-    my $f = $_[0]->data()->{fine};
-    is_array_ref($f) ? $f : [];
-  }
-);
-has due_date => ( 
-  is => 'ro',
-  lazy => 1,
-  default => sub {
-    my $due_date = $_[0]->data()->{due_date};
-    is_array_ref($due_date) ? $due_date->[0] : undef;
-  }
-);
-has due_hour => ( 
-  is => 'ro',
-  lazy => 1,
-  default => sub {
-    my $due_hour = $_[0]->data()->{due_hour};
-    is_array_ref($due_hour) ? $due_hour->[0] : undef;
+    []
   }
 );
 
 sub op { 'bor-info' } 
+
+my $config = {
+  fine => [qw(z31 z30 z13)],
+  'item-h' => [qw(z37 z30 z13)]
+};
+
+sub parse {
+  my($class,$xpath) = @_;
+
+  my $args = {};
+
+  for my $zkey(qw(z303 z304 z305)){
+    $args->{$zkey} = get_children(
+      $xpath->find("/bor-info/$zkey")->get_nodelist()
+    );
+  }
+
+  for my $child($xpath->find("/bor-info/item-l")->get_nodelist()){
+    $args->{'item-l'} //= [];
+
+    my $item_l = {};
+    $item_l->{due_date} = $child->findvalue('./due-date')->value();
+    $item_l->{due_hour} = $child->findvalue('./due-hour')->value();
+
+    for my $key(qw(z36 z30 z13)){
+      for my $data($child->find("./$key")->get_nodelist()){
+        $item_l->{ $key } //= [];
+        push @{ $item_l->{ $key } },get_children($data);
+      }
+    }
+    
+    push @{ $args->{'item-l'} },$item_l;
+
+  }
+
+  for my $key(keys %$config){
+    for my $child($xpath->find("/bor-info/$key")->get_nodelist()){
+      $args->{$key} //= [];
+
+      my %result = map {
+        $_ => get_children( $child->find("./$_")->get_nodelist() )
+      } @{ $config->{ $key } };
+
+      push @{ $args->{$key} },\%result;
+    }
+  }
+
+  __PACKAGE__->new(
+    %$args,
+    balance => $xpath->findvalue('/bor-info/balance'),
+    sign => $xpath->findvalue('/bor-info/sign'),
+    session_id => $xpath->findvalue('/bor-info/session-id')->value(),
+    error => $xpath->findvalue('/bor-info/error')->value()
+  );
+
+}
 
 1;

@@ -1,34 +1,50 @@
 package Catmandu::AlephX::Op::Present;
 use Catmandu::AlephX::Sane;
 use Moo;
-use Catmandu::AlephX::Metadata;
+use Catmandu::AlephX::Metadata::MARC;
 use Catmandu::AlephX::Record::Present;
+use Catmandu::AlephX::XPath::Helper qw(:all);
 
 with('Catmandu::AlephX::Response');
 
-has record => (
+has records => (
   is => 'ro',
   lazy => 1,
-  default => sub {
-    my $self = shift;
-    my $rs = $self->data->{record};
-    my @record = ();
-    for my $r(@$rs){
-      my @metadata = ();
-      for my $type(keys %{ $r->{metadata}->[0] }){
-        push @metadata,Catmandu::AlephX::Metadata->new(
-          type => $type,data => $r->{metadata}->[0]->{$type}->[0]
-        );
-      }
-      push @record,Catmandu::AlephX::Record::Present->new(
-        metadata => \@metadata,
-        record_header => $r->{record_header}->[0],
-        doc_number => $r->{doc_number}->[0]
-      );
-    }
-    \@record;
-  }
+  default => sub { [] }
 );
 sub op { 'present' }
+
+sub parse {
+  my($class,$xpath)=@_;
+
+  my @records;
+  
+  for my $r($xpath->find('/present/record')->get_nodelist()){
+  
+    my @metadata;
+
+    my $record_header = get_children(
+      $r->find('./record_header')->get_nodelist()
+    );
+
+    push @metadata,Catmandu::AlephX::Metadata::MARC->parse(
+      $r->find('./metadata/oai_marc')->get_nodelist()
+    );
+    
+    push @records,Catmandu::AlephX::Record::Present->new(
+      metadata => \@metadata,
+      record_header => $record_header,
+      doc_number => $r->findvalue('./doc_number')
+    );   
+
+  }
+
+  
+  __PACKAGE__->new(
+    records => \@records,
+    session_id => $xpath->findvalue('/find-doc/session-id')->value(),
+    error => $xpath->findvalue('/find-doc/error')->value()
+  );
+}
 
 1;

@@ -14,11 +14,11 @@ my $present = $aleph->present(
   set_entry => "000000001"
 );
 if($present->is_success){
-  for my $record(@{ $present->record }){
-    say "doc_number: ".$record->{doc_number};
-    for my $metadata (@{ $record->metadata }){
-      say "\tmetadata: ".$metadata->type;
-      print Dumper($metadata);
+  for my $record(@{ $present->records }){
+    say "record_header: ".Dumper($record->{record_header});
+    for my $metadata(@{ $record->metadata }){
+      say "\ttype: ".$metadata->type;
+      say "\tdata: ".Dumper($metadata->data());     
     }
   }
 }else{

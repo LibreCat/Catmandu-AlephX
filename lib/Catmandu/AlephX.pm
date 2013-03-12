@@ -2,15 +2,17 @@ package Catmandu::AlephX;
 use Catmandu::AlephX::Sane;
 use Moo;
 use LWP::UserAgent;
-use XML::Simple;
 use URI::Escape;
 use Data::Util qw(:check :validate);
+
+use Catmandu::AlephX::XPath::Helper qw(:all);
 
 use Catmandu::AlephX::Op::ItemData;
 use Catmandu::AlephX::Op::ReadItem;
 use Catmandu::AlephX::Op::Find;
 use Catmandu::AlephX::Op::FindDoc;
 use Catmandu::AlephX::Op::Present;
+use Catmandu::AlephX::Op::IllLoanInfo;
 use Catmandu::AlephX::Op::IllGetDocShort;
 use Catmandu::AlephX::Op::BorAuth;
 use Catmandu::AlephX::Op::BorInfo;
@@ -30,24 +32,6 @@ has _web => (
     );
   }
 );
-has _xml_parser => (
-  is => 'ro',
-  lazy => 1,
-  default => sub { 
-    XML::Simple->new(
-      #force every element into an array
-      ForceArray => 1,
-      #ignores attributes
-      NoAttr => 1,
-      #when not set, empty elements result in empty hashes
-      SuppressEmpty => 1
-    ); 
-  }
-);
-sub _from_xml {
-  my($self,$data)=@_;
-  $self->_xml_parser->XMLin($data);
-}
 sub _validate_web_response {
   my($res) = @_;
   $res->is_error && confess($res->content);
@@ -64,7 +48,6 @@ sub _do_web_request {
     confess "method $method not supported";
   }
   _validate_web_response($res);
-  #print $res->content();
   $res;
 }
 sub _post {
@@ -146,7 +129,7 @@ For each of the document's items it retrieves:
 
   my $item_data = $aleph->item_data(base => "rug01",doc_number => "001484477");
   if($item_data->is_success){
-    for my $item(@{ $item_data->item() }){
+    for my $item(@{ $item_data->items() }){
       print Dumper($item);
     };
   }else{
@@ -162,8 +145,7 @@ sub item_data {
   my($self,%args)=@_;
   $args{'op'} = "item-data";
   my $res = $self->_do_web_request(\%args);
-  my $data = $self->_from_xml($res->content);
-  Catmandu::AlephX::Op::ItemData->new(data => $data);    
+  Catmandu::AlephX::Op::ItemData->parse(xpath($res->content_ref()));    
 }
 
 =head2 read_item
@@ -193,8 +175,7 @@ sub read_item {
   my($self,%args)=@_;
   $args{'op'} = "read-item";
   my $res = $self->_do_web_request(\%args);
-  my $data = $self->_from_xml($res->content);
-  Catmandu::AlephX::Op::ReadItem->new(data => $data);    
+  Catmandu::AlephX::Op::ReadItem->parse(xpath($res->content_ref()));    
 }
 
 =head2 find
@@ -227,8 +208,7 @@ sub find {
   my($self,%args)=@_;
   $args{op} = 'find';
   my $res = $self->_do_web_request(\%args);
-  my $data = $self->_from_xml($res->content);
-  Catmandu::AlephX::Op::Find->new(data => $data);    
+  Catmandu::AlephX::Op::Find->parse(xpath($res->content_ref()));    
 }
 
 =head2 find_doc
@@ -241,7 +221,7 @@ sub find {
 
   my $find = $aleph->find_doc(base=>'rug01',doc_num=>'000000444',format=>'marc');
   if($find->is_success){
-    for my $record(@{ $find->record }){
+    for my $record(@{ $find->records }){
       say Dumper($record);
     }
   }else{
@@ -257,8 +237,7 @@ sub find_doc {
   my($self,%args)=@_;
   $args{op} = 'find-doc';
   my $res = $self->_do_web_request(\%args);
-  my $data = $self->_from_xml($res->content);
-  Catmandu::AlephX::Op::FindDoc->new(data => $data);    
+  Catmandu::AlephX::Op::FindDoc->parse(xpath($res->content_ref()));    
 }
 
 =head2 present
@@ -293,8 +272,7 @@ sub present {
   my($self,%args)=@_;
   $args{op} = 'present';
   my $res = $self->_do_web_request(\%args);
-  my $data = $self->_from_xml($res->content);
-  Catmandu::AlephX::Op::Present->new(data => $data);    
+  Catmandu::AlephX::Op::Present->parse(xpath($res->content_ref()));    
 }
 
 =head2 ill_get_doc_short
@@ -323,8 +301,7 @@ sub ill_get_doc_short {
   my($self,%args)=@_;
   $args{op} = 'ill-get-doc-short';
   my $res = $self->_do_web_request(\%args);
-  my $data = $self->_from_xml($res->content);
-  Catmandu::AlephX::Op::IllGetDocShort->new(data => $data);    
+  Catmandu::AlephX::Op::IllGetDocShort->parse(xpath($res->content_ref()));    
 }
 =head2 bor_auth
 
@@ -362,8 +339,7 @@ sub bor_auth {
   my($self,%args)=@_;
   $args{op} = 'bor-auth';
   my $res = $self->_do_web_request(\%args);
-  my $data = $self->_from_xml($res->content);
-  Catmandu::AlephX::Op::BorAuth->new(data => $data);
+  Catmandu::AlephX::Op::BorAuth->parse(xpath($res->content_ref()));
 } 
 =head2 bor_info
 
@@ -402,7 +378,6 @@ sub bor_auth {
         }
       }
     }
-    say "due_date: ".$info->due_date();
 
   }else{
     say STDERR "error: ".$info->error;
@@ -414,8 +389,7 @@ sub bor_info {
   my($self,%args)=@_;
   $args{op} = 'bor-info';
   my $res = $self->_do_web_request(\%args);
-  my $data = $self->_from_xml($res->content);
-  Catmandu::AlephX::Op::BorInfo->new(data => $data);
+  Catmandu::AlephX::Op::BorInfo->parse(xpath($res->content_ref()));
 }
 
 =head2 ill_bor_info
@@ -431,9 +405,16 @@ sub ill_bor_info {
   my($self,%args)=@_;
   $args{op} = 'ill-bor-info';
   my $res = $self->_do_web_request(\%args);
-  my $data = $self->_from_xml($res->content);
-  Catmandu::AlephX::Op::IllBorInfo->new(data => $data);
+  Catmandu::AlephX::Op::IllBorInfo->parse(xpath($res->content_ref()));
 }
+
+sub ill_loan_info {
+  my($self,%args)=@_;
+  $args{'op'} = "ill-loan-info";
+  my $res = $self->_do_web_request(\%args);
+  Catmandu::AlephX::Op::IllLoanInfo->parse(xpath($res->content_ref()));
+}
+
 =head1 AUTHOR
 
 Nicolas Franck, C<< <nicolas.franck at ugent.be> >>

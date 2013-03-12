@@ -16,12 +16,11 @@ my %args = (
 my $info = $aleph->bor_info(%args);
 if($info->is_success){
 
-  #print Dumper($info->z303);
-  #print Dumper($info->z304);
-  #print Dumper($info->z305);
-
+  print Dumper($info->z303);
+  print Dumper($info->z304);
+  print Dumper($info->z305);
   print Dumper($info->fine);
-  print $info->due_date;
+
 }else{
   say STDERR $info->error;
 } 

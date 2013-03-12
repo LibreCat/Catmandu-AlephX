@@ -3,3 +3,4 @@ blib/
 Build
 MYMETA.*
 .DS_Store
+*.bak
