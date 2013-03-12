@@ -271,6 +271,9 @@ sub present {
   my($self,%args)=@_;
   $args{op} = 'present';
   my $res = $self->_do_web_request(\%args);
+  open F,">/tmp/log";
+  print F $res->content();
+  close F;
   Catmandu::AlephX::Op::Present->parse(xpath($res->content_ref()));    
 }
 
