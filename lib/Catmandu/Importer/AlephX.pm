@@ -31,7 +31,7 @@ sub generator {
     my ($self) = @_;
     my $find    = $self->aleph->find(request => $self->query , base => $self->base);
     
-    return unless $find->is_success;    
+    return sub {undef} unless $find->is_success;    
     
     sub {
         state $set_number = $find->set_number;
