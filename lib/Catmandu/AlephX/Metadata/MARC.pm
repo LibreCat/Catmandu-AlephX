@@ -8,15 +8,13 @@ sub parse {
  
   my @marc = ();
 
-  my($fix_fields) = $xpath->find('./fixfield');
-  for my $fix_field(@$fix_fields){
+  for my $fix_field($xpath->find('./fixfield')->get_nodelist()){
     my $tag = $fix_field->findvalue('@id')->value();
     my $value = $fix_field->findvalue('.')->value();
     push @marc,[$tag,'','','_',$value];
   }
 
-  my($var_fields) = $xpath->find('./varfield');
-  for my $var_field(@$var_fields){
+  for my $var_field($xpath->find('./varfield')->get_nodelist()){
 
     my $tag = $var_field->findvalue('@id')->value();
     my $ind1 = $var_field->findvalue('@i1')->value();
@@ -24,8 +22,7 @@ sub parse {
 
     my @subf = ();
 
-    my($sub_fields) = $var_field->find('.//subfield')->get_nodelist();
-    foreach my $sub_field($sub_fields) {
+    foreach my $sub_field($var_field->find('.//subfield')->get_nodelist()) {
       my $code  = $sub_field->findvalue('@label')->value();
       my $value = $sub_field->findvalue('.')->value();
       push @subf,$code,$value;
