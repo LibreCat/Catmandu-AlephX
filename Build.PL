@@ -21,6 +21,7 @@ my $build = Module::Build->new(
   dist_version => '0.01',
   dist_author => [
     'Nicolas Franck <nicolas.franck@ugent.be>',
+    'Patrick Hochstenbach <patrick.hochstenbach@ugent.be>',
   ],
   dist_abstract => 'Low level api for Aleph X Services',
   requires => $requires,
