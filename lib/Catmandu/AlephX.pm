@@ -86,7 +86,6 @@ sub _construct_params_as_array {
 sub _get {
   my($self,$data)=@_;
   my $query = _construct_query($data) || "";
-  warn $self->url."?$query";
   $self->_web->get($self->url."?$query");
 }
 =head1 NAME

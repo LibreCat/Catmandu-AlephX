@@ -24,7 +24,7 @@ sub _fetch_items {
     my $item_data = $self->aleph->item_data(base => $self->base, doc_number => $doc_number);
     
     return unless $item_data->is_success;
-    return $item_data->item;
+    return $item_data->items;
 }
 
 sub generator {
@@ -41,12 +41,12 @@ sub generator {
         return if ($no_records == 0 || $count >= $no_records );
         my $present = $self->aleph->present(set_number => $set_number , set_entry => sprintf("%-9.9d",++$count));
         return unless $present->is_success;
-        return unless @{$present->record} == 1;
+        return unless @{$present->records} == 1;
     
-        my $doc   = $present->record->[0];
+        my $doc   = $present->records->[0];
         my $items = $self->_fetch_items($doc->{doc_number});
         
-        { record => $doc , items => $items };
+        { record => $doc->metadata->[0]->data , items => $items };
     };
 }
 
