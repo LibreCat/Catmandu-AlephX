@@ -8,7 +8,8 @@ my $requires = {
   'Moo' => 0,
   'URI::Escape' => 0,
   'LWP::UserAgent' => 0,
-  'Data::Util' => 0
+  'Data::Util' => 0,
+  'Catmandu' => '0.09',
 };
 my $recommends = {};
 my $build = Module::Build->new(

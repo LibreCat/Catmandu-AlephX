@@ -13,6 +13,7 @@ if($find->is_success){
   say "set_number: ".$find->set_number;
   say "no_records: ".$find->no_records;
   say "no_entries: ".$find->no_entries;
+  say "session_id: ".$find->session_id;
 }else{
   say STDERR $find->error;
 } 

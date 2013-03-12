@@ -11,13 +11,14 @@ my $aleph = Catmandu::AlephX->new(url => "http://aleph.ugent.be/X");
 my $set_number = $aleph->find(request => "wrd=(BIB.AFF)",base => "rug01")->set_number;
 my $present = $aleph->present(
   set_number => $set_number,
-  set_entry => "000000001-000000003"
+  set_entry => "000000001"
 );
 if($present->is_success){
   for my $record(@{ $present->record }){
     say "doc_number: ".$record->{doc_number};
-    for my $metadata(@{ $record->metadata }){
+    for my $metadata (@{ $record->metadata }){
       say "\tmetadata: ".$metadata->type;
+      print Dumper($metadata);
     }
   }
 }else{

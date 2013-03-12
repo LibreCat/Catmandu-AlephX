@@ -103,6 +103,7 @@ sub _construct_params_as_array {
 sub _get {
   my($self,$data)=@_;
   my $query = _construct_query($data) || "";
+  warn $self->url."?$query";
   $self->_web->get($self->url."?$query");
 }
 =head1 NAME
@@ -217,6 +218,10 @@ sub read_item {
 
   This method is equivalent to 'op' = 'find'
 
+=head3 arguments
+
+  request - search request
+  adjacent - if 'Y' then the documents should contain all the search words adjacent to each other, otherwise 'N'
 =cut
 sub find {
   my($self,%args)=@_;
@@ -440,6 +445,10 @@ under the terms of either: the GNU General Public License as published
 by the Free Software Foundation; or the Artistic License.
 
 See http://dev.perl.org/licenses/ for more information.
+
+=head1 AUTHOR
+
+Patrick Hochstenbach, C<< <patrick dot hochstenbach at ugent dot be> >>
 
 =cut
 1;
