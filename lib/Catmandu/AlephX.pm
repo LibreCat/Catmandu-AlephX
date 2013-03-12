@@ -1,13 +1,12 @@
 package Catmandu::AlephX;
-use Catmandu::AlephX::Sane;
+use Catmandu::Sane;
 use Moo;
 use LWP::UserAgent;
 use URI::Escape;
 use Data::Util qw(:check :validate);
 
-use Catmandu::AlephX::XPath::Helper qw(:all);
-
 use Catmandu::AlephX::Op::ItemData;
+use Catmandu::AlephX::Op::ItemDataMulti;
 use Catmandu::AlephX::Op::ReadItem;
 use Catmandu::AlephX::Op::Find;
 use Catmandu::AlephX::Op::FindDoc;
@@ -17,6 +16,9 @@ use Catmandu::AlephX::Op::IllGetDocShort;
 use Catmandu::AlephX::Op::BorAuth;
 use Catmandu::AlephX::Op::BorInfo;
 use Catmandu::AlephX::Op::IllBorInfo;
+use Catmandu::AlephX::Op::CircStatus;
+use Catmandu::AlephX::Op::CircStatM;
+use Catmandu::AlephX::Op::PublishAvail;
 
 has url => (
   is => 'ro',
@@ -144,9 +146,43 @@ sub item_data {
   my($self,%args)=@_;
   $args{'op'} = "item-data";
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::ItemData->parse(xpath($res->content_ref()));    
+  Catmandu::AlephX::Op::ItemData->parse($res->content_ref());    
 }
+=head2 item-data-multi
+ 
+=head3 documentation from AlephX
+ 
+This service takes a document number from the user and for each of the document's items retrieves the following:
+  Item information (from Z30)
+  Loan information (from Z36)
+An indication of whether or not the item is on hold, has hold requests, or is expected (that is, has not arrived yet but is expected)
+It is similar to the item_data X-service, except for the parameter START_POINT, which enables the retrieval of information for documents with more than 1000 items.
 
+=head3 example
+
+  my $item_data_m = $aleph->item_data_multi(base => "rug01",doc_number => "001484477",start_point => '000000990');
+  if($item_data_m->is_success){
+    for my $item(@{ $item_data_m->items() }){
+      print Dumper($item);
+    };
+  }else{
+    print STDERR $item_data_m->error."\n";
+  }
+
+  say "items retrieved, starting at ".$item_data_m->start_point() if $item_data_m->start_point();
+
+=head3 remarks
+  
+  This method is equivalent to 'op' = 'item-data-multi'
+  The attribute 'start_point' only supplies a value, if the document has over 990 items
+
+=cut
+sub item_data_multi {
+  my($self,%args)=@_;
+  $args{'op'} = "item-data-multi";
+  my $res = $self->_do_web_request(\%args);
+  Catmandu::AlephX::Op::ItemDataMulti->parse($res->content_ref());    
+}
 =head2 read_item
 
 =head3 documentation from AlephX
@@ -174,7 +210,7 @@ sub read_item {
   my($self,%args)=@_;
   $args{'op'} = "read-item";
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::ReadItem->parse(xpath($res->content_ref()));    
+  Catmandu::AlephX::Op::ReadItem->parse($res->content_ref());    
 }
 
 =head2 find
@@ -207,7 +243,7 @@ sub find {
   my($self,%args)=@_;
   $args{op} = 'find';
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::Find->parse(xpath($res->content_ref()));    
+  Catmandu::AlephX::Op::Find->parse($res->content_ref());    
 }
 
 =head2 find_doc
@@ -236,7 +272,7 @@ sub find_doc {
   my($self,%args)=@_;
   $args{op} = 'find-doc';
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::FindDoc->parse(xpath($res->content_ref()));    
+  Catmandu::AlephX::Op::FindDoc->parse($res->content_ref());    
 }
 
 =head2 present
@@ -274,7 +310,7 @@ sub present {
   open F,">/tmp/log";
   print F $res->content();
   close F;
-  Catmandu::AlephX::Op::Present->parse(xpath($res->content_ref()));    
+  Catmandu::AlephX::Op::Present->parse($res->content_ref());    
 }
 
 =head2 ill_get_doc_short
@@ -303,7 +339,7 @@ sub ill_get_doc_short {
   my($self,%args)=@_;
   $args{op} = 'ill-get-doc-short';
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::IllGetDocShort->parse(xpath($res->content_ref()));    
+  Catmandu::AlephX::Op::IllGetDocShort->parse($res->content_ref());    
 }
 =head2 bor_auth
 
@@ -341,7 +377,7 @@ sub bor_auth {
   my($self,%args)=@_;
   $args{op} = 'bor-auth';
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::BorAuth->parse(xpath($res->content_ref()));
+  Catmandu::AlephX::Op::BorAuth->parse($res->content_ref());
 } 
 =head2 bor_info
 
@@ -391,7 +427,7 @@ sub bor_info {
   my($self,%args)=@_;
   $args{op} = 'bor-info';
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::BorInfo->parse(xpath($res->content_ref()));
+  Catmandu::AlephX::Op::BorInfo->parse($res->content_ref());
 }
 
 =head2 ill_bor_info
@@ -407,16 +443,93 @@ sub ill_bor_info {
   my($self,%args)=@_;
   $args{op} = 'ill-bor-info';
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::IllBorInfo->parse(xpath($res->content_ref()));
+  Catmandu::AlephX::Op::IllBorInfo->parse($res->content_ref());
 }
 
 sub ill_loan_info {
   my($self,%args)=@_;
   $args{'op'} = "ill-loan-info";
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::IllLoanInfo->parse(xpath($res->content_ref()));
+  Catmandu::AlephX::Op::IllLoanInfo->parse($res->content_ref());
+}
+=head2 circ_status
+
+=head3 documentation from Aleph X
+
+The service retrieves the circulation status for each document number entered by the user.
+
+  Item information (From Z30).
+  Loan information (from Z36).
+  Loan Status (Tab15), Due Date, Due Hour etc.
+
+=head3 example
+
+=cut
+sub circ_status {
+  my($self,%args)=@_;
+  $args{'op'} = "circ-status";
+  my $res = $self->_do_web_request(\%args);
+  Catmandu::AlephX::Op::CircStatus->parse($res->content_ref());
+}
+=head2 circ_stat_m
+
+=head3 documentation from Aleph X
+
+The service retrieves the circulation status for each document number entered by the user (suitable for documents with more than 1000 items).
+
+  Item information (From Z30).
+  Loan information (from Z36).
+  Loan Status (Tab15), Due Date, Due Hour etc.
+
+This service is similar to circ-status X-service, except for the parameter START_POINT which enables to retrieve information for documents with more than 1000 items.
+
+=head3 example
+
+=cut
+sub circ_stat_m {
+  my($self,%args)=@_;
+  $args{'op'} = "circ-stat-m";
+  my $res = $self->_do_web_request(\%args);
+  Catmandu::AlephX::Op::CircStatM->parse($res->content_ref());
+}
+=head2 publish_avail
+
+=head3 documentation from Aleph X
+
+This service supplies the current availability status of a document.
+
+The X-Server does not change any data.  
+
+=head3 example
+
+my $publish = $aleph->publish_avail(doc_num => '000196220,001313162,001484478,001484538,001317121,000000000',library=>'rug01');
+if($publish->is_success){
+
+  #format for $publish->list() : [ [<id>,<marc-array>], .. ]
+
+  for my $item(@{ $publish->list }){
+
+    say "id: $item->[0]";
+    if($item->[1]){
+      say "marc array:";
+      say Dumper($item->[1]);
+    }else{
+      say "nothing for $item->[0]";
+    }
+
+    say "\n---";
+  }
+}else{
+  say STDERR $publish->error;
 }
 
+=cut
+sub publish_avail {
+  my($self,%args)=@_;
+  $args{'op'} = "publish-avail";
+  my $res = $self->_do_web_request(\%args);
+  Catmandu::AlephX::Op::PublishAvail->parse($res->content_ref());
+}
 =head1 AUTHOR
 
 Nicolas Franck, C<< <nicolas.franck at ugent.be> >>
@@ -428,10 +541,6 @@ under the terms of either: the GNU General Public License as published
 by the Free Software Foundation; or the Artistic License.
 
 See http://dev.perl.org/licenses/ for more information.
-
-=head1 AUTHOR
-
-Patrick Hochstenbach, C<< <patrick dot hochstenbach at ugent dot be> >>
 
 =cut
 1;

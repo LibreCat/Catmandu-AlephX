@@ -1,8 +1,7 @@
 package Catmandu::AlephX::Op::IllBorInfo;
-use Catmandu::AlephX::Sane;
+use Catmandu::Sane;
 use Data::Util qw(:check :validate);
 use Moo;
-use Catmandu::AlephX::XPath::Helper qw(:all);
 
 extends('Catmandu::AlephX::Op::BorAuth');
 with('Catmandu::AlephX::Response');
@@ -21,7 +20,8 @@ has z308 => (
 sub op { 'ill-bor-info' } 
 
 sub parse {
-  my($class,$xpath)=@_;
+  my($class,$str_ref) = @_;
+  my $xpath = xpath($str_ref);
 
   my @keys = qw(z303 z304 z305 z308);
   my %args = ();

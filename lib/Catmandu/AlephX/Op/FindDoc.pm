@@ -1,5 +1,5 @@
 package Catmandu::AlephX::Op::FindDoc;
-use Catmandu::AlephX::Sane;
+use Catmandu::Sane;
 use Moo;
 use Catmandu::AlephX::Metadata::MARC;
 use Catmandu::AlephX::Record;
@@ -12,7 +12,8 @@ has record => (
 sub op { 'find-doc' }
 
 sub parse {
-  my($class,$xpath) = @_;
+  my($class,$str_ref) = @_;
+  my $xpath = xpath($str_ref);
 
   my @metadata = ();
 

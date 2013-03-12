@@ -1,5 +1,5 @@
 package Catmandu::AlephX::Metadata::MARC;
-use Catmandu::AlephX::Sane;
+use Catmandu::Sane;
 use Moo;
 extends qw(Catmandu::AlephX::Metadata);
 

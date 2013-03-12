@@ -1,8 +1,7 @@
 package Catmandu::AlephX::Op::BorInfo;
-use Catmandu::AlephX::Sane;
+use Catmandu::Sane;
 use Data::Util qw(:check :validate);
 use Moo;
-use Catmandu::AlephX::XPath::Helper qw(:all);
 
 extends('Catmandu::AlephX::Op::BorAuth');
 with('Catmandu::AlephX::Response');
@@ -49,7 +48,8 @@ my $config = {
 };
 
 sub parse {
-  my($class,$xpath) = @_;
+  my($class,$str_ref) = @_;
+  my $xpath = xpath($str_ref);
 
   my $args = {};
 

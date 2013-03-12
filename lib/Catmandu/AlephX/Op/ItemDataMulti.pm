@@ -1,4 +1,4 @@
-package Catmandu::AlephX::Op::ItemData;
+package Catmandu::AlephX::Op::ItemDataMulti;
 use Catmandu::Sane;
 use Data::Util qw(:check :validate);
 use Moo;
@@ -18,21 +18,26 @@ has items => (
     [];
   }
 ); 
-sub op { 'item-data' }
+has start_point => (is => 'ro');
+
+sub op { 'item-data-multi' }
 
 sub parse {
   my($class,$str_ref) = @_;
   my $xpath = xpath($str_ref);
 
+  my $op = op();
+  
   my @items;
 
-  for my $item($xpath->find('/item-data/item')->get_nodelist()){
+  for my $item($xpath->find("/$op/item")->get_nodelist()){
     push @items,get_children($item);
   }
   __PACKAGE__->new(
-    session_id => $xpath->findvalue('/item-data/session-id')->value(),
-    error => $xpath->findvalue('/item-data/error')->value(),
-    items => \@items
+    session_id => $xpath->findvalue("/$op/session-id")->value(),
+    error => $xpath->findvalue("/$op/error")->value(),
+    items => \@items,
+    start_point => $xpath->findvalue("/$op/start-point")->value()
   );
 } 
 

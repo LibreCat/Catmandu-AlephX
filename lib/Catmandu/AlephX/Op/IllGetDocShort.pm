@@ -1,8 +1,7 @@
 package Catmandu::AlephX::Op::IllGetDocShort;
-use Catmandu::AlephX::Sane;
+use Catmandu::Sane;
 use Data::Util qw(:check :validate);
 use Moo;
-use Catmandu::AlephX::XPath::Helper qw(:all);
 
 with('Catmandu::AlephX::Response');
 
@@ -17,7 +16,8 @@ has z13 => (
 sub op { 'ill-get-doc-short' }
 
 sub parse {
-  my($class,$xpath)=@_;
+  my($class,$str_ref) = @_;
+  my $xpath = xpath($str_ref);
 
   my $z13 = {};
 

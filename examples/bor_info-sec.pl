@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 use FindBin;
 use lib "$FindBin::Bin/../lib";
-use Catmandu::AlephX::Sane;
+use Catmandu::Sane;
 use Catmandu::AlephX;
 use open qw(:std :utf8);
 use Data::Dumper;

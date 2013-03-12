@@ -1,5 +1,5 @@
 package Catmandu::AlephX::Metadata;
-use Catmandu::AlephX::Sane;
+use Catmandu::Sane;
 use Moo;
 
 has type => (is => 'ro',required => 1);

@@ -1,5 +1,5 @@
 package Catmandu::AlephX::XPath::Helper;
-use Catmandu::AlephX::Sane;
+use Catmandu::Sane;
 use XML::XPath;
 use Data::Util qw(:check);
 use Exporter qw(import);

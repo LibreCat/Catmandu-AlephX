@@ -8,9 +8,10 @@ use open qw(:std :utf8);
 
 my $aleph = Catmandu::AlephX->new(url => "http://aleph.ugent.be/X");
 
-my $result = $aleph->ill_get_doc_short(doc_number => "000000001",library=>"usm01");
-if($result->is_success){
-  print Dumper($result->z13);
+my $circstatus = $aleph->circ_status(sys_no => '001484478',library => 'rug01');
+
+if($circstatus->is_success){
+  print Dumper($circstatus);
 }else{
-  say STDERR $result->error;
+  say STDERR $circstatus->error;
 } 

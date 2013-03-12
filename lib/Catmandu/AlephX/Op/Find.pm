@@ -1,5 +1,5 @@
 package Catmandu::AlephX::Op::Find;
-use Catmandu::AlephX::Sane;
+use Catmandu::Sane;
 use Moo;
 
 with('Catmandu::AlephX::Response');
@@ -17,7 +17,9 @@ has no_entries => (
 sub op { 'find' }
 
 sub parse {
-  my($class,$xpath) = @_;
+  my($class,$str_ref) = @_;
+  my $xpath = xpath($str_ref);
+
   __PACKAGE__->new(
     error => $xpath->findvalue('/find/error')->value(),
     session_id => $xpath->findvalue('/find/session-id')->value(),

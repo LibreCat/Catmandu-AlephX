@@ -1,5 +1,5 @@
 package Catmandu::AlephX::Record;
-use Catmandu::AlephX::Sane;
+use Catmandu::Sane;
 use Data::Util qw(:validate);
 use Moo;
 use Catmandu::AlephX::Metadata;

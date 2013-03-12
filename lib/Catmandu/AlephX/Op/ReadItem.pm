@@ -1,8 +1,7 @@
 package Catmandu::AlephX::Op::ReadItem;
-use Catmandu::AlephX::Sane;
+use Catmandu::Sane;
 use Data::Util qw(:check :validate);
 use Moo;
-use Catmandu::AlephX::XPath::Helper qw(:all);
 
 with('Catmandu::AlephX::Response');
 
@@ -22,7 +21,8 @@ has z30 => (
 sub op { 'read-item' } 
 
 sub parse {
-  my($class,$xpath) = @_;
+  my($class,$str_ref) = @_;
+  my $xpath = xpath($str_ref);
 
   my @z30;
 

@@ -1,7 +1,11 @@
 package Catmandu::AlephX::Response;
-use Catmandu::AlephX::Sane;
+use Catmandu::Sane;
 use Moo::Role;
 use Data::Util qw(:validate :check);
+use Catmandu::AlephX::XPath::Helper qw(:all);
+use Exporter qw(import);
+our @EXPORT_OK=qw(get_children xpath);
+our %EXPORT_TAGS = (all=>[@EXPORT_OK]);
 
 =head1 NAME
 

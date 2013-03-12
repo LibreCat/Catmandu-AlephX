@@ -1,9 +1,8 @@
 package Catmandu::AlephX::Op::Present;
-use Catmandu::AlephX::Sane;
+use Catmandu::Sane;
 use Moo;
 use Catmandu::AlephX::Metadata::MARC;
 use Catmandu::AlephX::Record::Present;
-use Catmandu::AlephX::XPath::Helper qw(:all);
 
 with('Catmandu::AlephX::Response');
 
@@ -15,7 +14,8 @@ has records => (
 sub op { 'present' }
 
 sub parse {
-  my($class,$xpath)=@_;
+  my($class,$str_ref) = @_;
+  my $xpath = xpath($str_ref);
 
   my @records;
   

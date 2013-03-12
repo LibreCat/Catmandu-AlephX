@@ -9,7 +9,7 @@ use open qw(:std :utf8);
 my $aleph = Catmandu::AlephX->new(url => "http://aleph.ugent.be/X");
 
 my($base,$doc_number)=("rug01","001484477");
-my $item_data = $aleph->item_data(base => $base,doc_number => $doc_number);
+my $item_data = $aleph->item_data_multi(base => $base,doc_number => $doc_number);
 if($item_data->is_success){
   for my $item(@{ $item_data->items() }){
     print Dumper($item);
