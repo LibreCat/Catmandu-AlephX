@@ -2,7 +2,7 @@ package Catmandu::AlephX::Op::IllLoanInfo;
 use Catmandu::AlephX::Sane;
 use Data::Util qw(:check :validate);
 use Moo;
-use Catmandu::AlephX::XPath::Helper;
+use Catmandu::AlephX::XPath::Helper qw(:all);
 
 with('Catmandu::AlephX::Response');
 
@@ -24,7 +24,7 @@ sub parse {
 
   my($z) = $xpath->find('/ill-LOAN-INFO/z36')->get_nodelist();
 
-  $z36 = Catmandu::AlephX::XPath::Helper->get_children($z) if $z;
+  $z36 = get_children($z) if $z;
 
   __PACKAGE__->new(
     session_id => $xpath->findvalue('/ill-LOAN-INFO/session-id')->value(),

@@ -2,7 +2,7 @@ package Catmandu::AlephX::Op::IllGetDocShort;
 use Catmandu::AlephX::Sane;
 use Data::Util qw(:check :validate);
 use Moo;
-use Catmandu::AlephX::XPath::Helper;
+use Catmandu::AlephX::XPath::Helper qw(:all);
 
 with('Catmandu::AlephX::Response');
 
@@ -23,7 +23,7 @@ sub parse {
 
   my($z) = $xpath->find('/ill-get-doc-short/z13')->get_nodelist();
 
-  $z13 = Catmandu::AlephX::XPath::Helper->get_children($z) if $z;
+  $z13 = get_children($z) if $z;
 
   __PACKAGE__->new(
     session_id => $xpath->findvalue('/ill-get-doc-short/session-id')->value(),

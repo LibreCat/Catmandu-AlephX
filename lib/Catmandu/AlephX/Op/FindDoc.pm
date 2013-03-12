@@ -7,8 +7,7 @@ use Catmandu::AlephX::Record;
 with('Catmandu::AlephX::Response');
 
 has record => ( 
-  is => 'ro',
-  lazy => 1
+  is => 'ro'
 );
 sub op { 'find-doc' }
 

@@ -2,7 +2,7 @@ package Catmandu::AlephX::Op::ReadItem;
 use Catmandu::AlephX::Sane;
 use Data::Util qw(:check :validate);
 use Moo;
-use Catmandu::AlephX::XPath::Helper;
+use Catmandu::AlephX::XPath::Helper qw(:all);
 
 with('Catmandu::AlephX::Response');
 
@@ -27,7 +27,7 @@ sub parse {
   my @z30;
 
   for my $z($xpath->find('/read-item/z30')->get_nodelist()){
-    push @z30,Catmandu::AlephX::XPath::Helper->get_children($z);
+    push @z30,get_children($z);
   }    
 
   __PACKAGE__->new(

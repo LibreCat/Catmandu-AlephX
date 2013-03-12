@@ -3,7 +3,7 @@ use Catmandu::AlephX::Sane;
 use XML::XPath;
 use Data::Util qw(:check);
 use Exporter qw(import);
-our @EXPORT_OK=qw(get_children);
+our @EXPORT_OK=qw(get_children xpath);
 our %EXPORT_TAGS = (all=>[@EXPORT_OK]);
 
 sub get_children {

@@ -3,7 +3,7 @@ use Catmandu::AlephX::Sane;
 use Moo;
 use Catmandu::AlephX::Metadata::MARC;
 use Catmandu::AlephX::Record::Present;
-use Catmandu::AlephX::XPath::Helper;
+use Catmandu::AlephX::XPath::Helper qw(:all);
 
 with('Catmandu::AlephX::Response');
 
@@ -23,7 +23,7 @@ sub parse {
   
     my @metadata;
 
-    my $record_header = Catmandu::AlephX::XPath::Helper->get_children(
+    my $record_header = get_children(
       $r->find('./record_header')->get_nodelist()
     );
 

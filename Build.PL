@@ -4,7 +4,7 @@ use Module::Build;
 
 my $requires = {
   perl => '>=5.10.1',
-  'XML::Simple' => 0,
+  'XML::XPath' => 0,
   'Moo' => 0,
   'URI::Escape' => 0,
   'LWP::UserAgent' => 0,

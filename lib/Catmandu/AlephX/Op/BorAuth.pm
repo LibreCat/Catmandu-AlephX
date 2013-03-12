@@ -2,7 +2,7 @@ package Catmandu::AlephX::Op::BorAuth;
 use Catmandu::AlephX::Sane;
 use Data::Util qw(:check :validate);
 use Moo;
-use Catmandu::AlephX::XPath::Helper;
+use Catmandu::AlephX::XPath::Helper qw(:all);
 
 with('Catmandu::AlephX::Response');
 
@@ -46,7 +46,7 @@ sub parse {
   my %args = ();
 
   for my $key(@keys){
-    my $data = Catmandu::AlephX::XPath::Helper->get_children(
+    my $data = get_children(
       $xpath->find("/bor-auth/$key")->get_nodelist()
     );
     $args{$key} = $data;

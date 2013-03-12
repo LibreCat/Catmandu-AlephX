@@ -2,7 +2,7 @@ package Catmandu::AlephX::Op::BorInfo;
 use Catmandu::AlephX::Sane;
 use Data::Util qw(:check :validate);
 use Moo;
-use Catmandu::AlephX::XPath::Helper;
+use Catmandu::AlephX::XPath::Helper qw(:all);
 
 extends('Catmandu::AlephX::Op::BorAuth');
 with('Catmandu::AlephX::Response');
@@ -54,7 +54,7 @@ sub parse {
   my $args = {};
 
   for my $zkey(qw(z303 z304 z305)){
-    $args->{$zkey} = Catmandu::AlephX::XPath::Helper->get_children(
+    $args->{$zkey} = get_children(
       $xpath->find("/bor-info/$zkey")->get_nodelist()
     );
   }
@@ -69,7 +69,7 @@ sub parse {
     for my $key(qw(z36 z30 z13)){
       for my $data($child->find("./$key")->get_nodelist()){
         $item_l->{ $key } //= [];
-        push @{ $item_l->{ $key } },Catmandu::AlephX::XPath::Helper->get_children($data);
+        push @{ $item_l->{ $key } },get_children($data);
       }
     }
     
@@ -82,7 +82,7 @@ sub parse {
       $args->{$key} //= [];
 
       my %result = map {
-        $_ => Catmandu::AlephX::XPath::Helper->get_children( $child->find("./$_")->get_nodelist() )
+        $_ => get_children( $child->find("./$_")->get_nodelist() )
       } @{ $config->{ $key } };
 
       push @{ $args->{$key} },\%result;

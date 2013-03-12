@@ -2,7 +2,7 @@ package Catmandu::AlephX::Op::ItemData;
 use Catmandu::AlephX::Sane;
 use Data::Util qw(:check :validate);
 use Moo;
-use Catmandu::AlephX::XPath::Helper;
+use Catmandu::AlephX::XPath::Helper qw(:all);
 
 with('Catmandu::AlephX::Response');
 
@@ -26,7 +26,7 @@ sub parse {
   my @items;
 
   for my $item($xpath->find('/item-data/item')->get_nodelist()){
-    push @items,Catmandu::AlephX::XPath::Helper->get_children($item);
+    push @items,get_children($item);
   }
   __PACKAGE__->new(
     session_id => $xpath->findvalue('/item-data/session-id')->value(),

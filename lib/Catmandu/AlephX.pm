@@ -5,7 +5,7 @@ use LWP::UserAgent;
 use URI::Escape;
 use Data::Util qw(:check :validate);
 
-use XML::XPath;
+use Catmandu::AlephX::XPath::Helper qw(:all);
 
 use Catmandu::AlephX::Op::ItemData;
 use Catmandu::AlephX::Op::ReadItem;
@@ -16,7 +16,7 @@ use Catmandu::AlephX::Op::IllLoanInfo;
 use Catmandu::AlephX::Op::IllGetDocShort;
 use Catmandu::AlephX::Op::BorAuth;
 use Catmandu::AlephX::Op::BorInfo;
-#use Catmandu::AlephX::Op::IllBorInfo;
+use Catmandu::AlephX::Op::IllBorInfo;
 
 has url => (
   is => 'ro',
@@ -144,7 +144,7 @@ sub item_data {
   my($self,%args)=@_;
   $args{'op'} = "item-data";
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::ItemData->parse(XML::XPath->new(xml => $res->content()));    
+  Catmandu::AlephX::Op::ItemData->parse(xpath($res->content_ref()));    
 }
 
 =head2 read_item
@@ -174,7 +174,7 @@ sub read_item {
   my($self,%args)=@_;
   $args{'op'} = "read-item";
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::ReadItem->parse(XML::XPath->new(xml => $res->content()));    
+  Catmandu::AlephX::Op::ReadItem->parse(xpath($res->content_ref()));    
 }
 
 =head2 find
@@ -203,7 +203,7 @@ sub find {
   my($self,%args)=@_;
   $args{op} = 'find';
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::Find->parse(XML::XPath->new(xml => $res->content));    
+  Catmandu::AlephX::Op::Find->parse(xpath($res->content_ref()));    
 }
 
 =head2 find_doc
@@ -232,7 +232,7 @@ sub find_doc {
   my($self,%args)=@_;
   $args{op} = 'find-doc';
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::FindDoc->parse(XML::XPath->new(xml => $res->content()));    
+  Catmandu::AlephX::Op::FindDoc->parse(xpath($res->content_ref()));    
 }
 
 =head2 present
@@ -267,7 +267,7 @@ sub present {
   my($self,%args)=@_;
   $args{op} = 'present';
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::Present->parse(XML::XPath->new(xml => $res->content()));    
+  Catmandu::AlephX::Op::Present->parse(xpath($res->content_ref()));    
 }
 
 =head2 ill_get_doc_short
@@ -296,7 +296,7 @@ sub ill_get_doc_short {
   my($self,%args)=@_;
   $args{op} = 'ill-get-doc-short';
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::IllGetDocShort->parse(XML::XPath->new(xml => $res->content()));    
+  Catmandu::AlephX::Op::IllGetDocShort->parse(xpath($res->content_ref()));    
 }
 =head2 bor_auth
 
@@ -334,7 +334,7 @@ sub bor_auth {
   my($self,%args)=@_;
   $args{op} = 'bor-auth';
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::BorAuth->parse(XML::XPath->new(xml => $res->content()));
+  Catmandu::AlephX::Op::BorAuth->parse(xpath($res->content_ref()));
 } 
 =head2 bor_info
 
@@ -384,7 +384,7 @@ sub bor_info {
   my($self,%args)=@_;
   $args{op} = 'bor-info';
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::BorInfo->parse(XML::XPath->new(xml => $res->content()));
+  Catmandu::AlephX::Op::BorInfo->parse(xpath($res->content_ref()));
 }
 
 =head2 ill_bor_info
@@ -400,14 +400,14 @@ sub ill_bor_info {
   my($self,%args)=@_;
   $args{op} = 'ill-bor-info';
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::IllBorInfo->parse(XML::XPath->new(xml => $res->content()));
+  Catmandu::AlephX::Op::IllBorInfo->parse(xpath($res->content_ref()));
 }
 
 sub ill_loan_info {
   my($self,%args)=@_;
   $args{'op'} = "ill-loan-info";
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::IllLoanInfo->parse(XML::XPath->new(xml => $res->content()));
+  Catmandu::AlephX::Op::IllLoanInfo->parse(xpath($res->content_ref()));
 }
 
 =head1 AUTHOR
