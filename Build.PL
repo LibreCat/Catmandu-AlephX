@@ -10,7 +10,9 @@ my $requires = {
   'LWP::UserAgent' => 0,
   'Data::Util' => 0
 };
-my $recommends = {};
+my $recommends = {
+  'Term::ReadKey' => 0
+};
 my $build = Module::Build->new(
   module_name => 'Low level api for Aleph X Services',
   dist_version => '0.01',
