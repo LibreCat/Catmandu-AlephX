@@ -31,7 +31,7 @@ sub parse {
       push @subf,$code,$value;
     }
 
-    push @marc,[$tag,$ind1,$ind2,\@subf];
+    push @marc,[$tag,$ind1,$ind2,@subf];
 
   }
 
