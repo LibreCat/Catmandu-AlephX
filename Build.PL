@@ -11,7 +11,7 @@ my $requires = {
   'Data::Util' => 0,
   'Catmandu' => '0.09',
   Catmandu => 0,
-  'Catmandu::Importer::MARC' => 0
+  #'Catmandu::Importer::MARC' => 0
 };
 my $recommends = {
   'Term::ReadKey' => 0
