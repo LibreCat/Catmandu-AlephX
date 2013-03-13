@@ -5,26 +5,40 @@ extends qw(Catmandu::AlephX::Metadata);
 
 sub parse {
   my($class,$xpath)=@_;
- 
+
   my @marc = ();
 
-  for my $fix_field($xpath->find('./fixfield')->get_nodelist()){
-    my $tag = $fix_field->findvalue('@id')->value();
-    my $value = $fix_field->findvalue('.')->value();
+  my $leader = $xpath->findvalue('./leader')->value();
+  my $fmt = "";
+
+  for my $controlfield($xpath->find('./controlfield')->get_nodelist()){
+    my $tag = $controlfield->findvalue('@tag')->value();
+    my $value = $controlfield->findvalue('.')->value();
+    if($tag eq "FMT"){
+      $fmt = $value;
+      next;
+    }
+    #leader can also be specified in a controlfield??
+    elsif($tag eq "LDR"){
+      $leader = $value; 
+      next; 
+    }
     push @marc,[$tag,'','','_',$value];
   }
 
-  for my $var_field($xpath->find('./varfield')->get_nodelist()){
+  unshift @marc,['FMT','','','_',$fmt],['LDR','','','_',$leader];
 
-    my $tag = $var_field->findvalue('@id')->value();
-    my $ind1 = $var_field->findvalue('@i1')->value();
-    my $ind2 = $var_field->findvalue('@i2')->value();
+  for my $datafield($xpath->find('./datafield')->get_nodelist()){
+
+    my $tag = $datafield->findvalue('@tag')->value();
+    my $ind1 = $datafield->findvalue('@ind1')->value();
+    my $ind2 = $datafield->findvalue('@ind2')->value();
 
     my @subf = ();
 
-    foreach my $sub_field($var_field->find('.//subfield')->get_nodelist()) {
-      my $code  = $sub_field->findvalue('@label')->value();
-      my $value = $sub_field->findvalue('.')->value();
+    foreach my $subfield($datafield->find('./subfield')->get_nodelist()) {
+      my $code  = $subfield->findvalue('@code')->value();
+      my $value = $subfield->findvalue('.')->value();
       push @subf,$code,$value;
     }
 

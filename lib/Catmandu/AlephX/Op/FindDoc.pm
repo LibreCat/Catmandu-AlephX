@@ -1,7 +1,7 @@
 package Catmandu::AlephX::Op::FindDoc;
 use Catmandu::Sane;
 use Moo;
-use Catmandu::AlephX::Metadata::MARC;
+use Catmandu::AlephX::Metadata::MARC::Aleph;
 use Catmandu::AlephX::Record;
 
 with('Catmandu::AlephX::Response');
@@ -20,7 +20,7 @@ sub parse {
   #metadata
   my($oai_marc) = $xpath->find('/find-doc/record[1]/metadata/oai_marc')->get_nodelist();
 
-  push @metadata,Catmandu::AlephX::Metadata::MARC->parse($oai_marc) if $oai_marc;
+  push @metadata,Catmandu::AlephX::Metadata::MARC::Aleph->parse($oai_marc) if $oai_marc;
 
   __PACKAGE__->new(
     record => Catmandu::AlephX::Record->new(metadata => \@metadata),

@@ -3,7 +3,7 @@ use FindBin;
 use lib "$FindBin::Bin/../lib";
 use Catmandu::Sane;
 use Catmandu::AlephX;
-use Data::Dumper;
+use JSON qw(to_json);
 use open qw(:std :utf8);
 use Catmandu::Exporter::MARC;
 
@@ -15,16 +15,16 @@ my $publish = $aleph->publish_avail(doc_num => '000196220,001313162,001484478,00
 if($publish->is_success){
 
   for my $item(@{ $publish->list }){
-    #say $item->[0]." : ".($item->[1] ? "available":"not available");
 
-    say "id: $item->[0]";
-    if($item->[1]){
+    say "id: '$item->{_id}'";
+    if($item->{record}){
+      say "data: \n".to_json($item->{record},{ pretty => 0 });
       say "xml:";
-      $exporter->add({ record => $item->[1] });
+      $exporter->add({ record => $item->{record} });
       $exporter->commit;
     }
     else{
-      say "nothing for $item->[0]";
+      say "nothing for $item->{_id}";
     }
 
     say "\n---";

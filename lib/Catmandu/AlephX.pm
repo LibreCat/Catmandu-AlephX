@@ -19,6 +19,8 @@ use Catmandu::AlephX::Op::IllBorInfo;
 use Catmandu::AlephX::Op::CircStatus;
 use Catmandu::AlephX::Op::CircStatM;
 use Catmandu::AlephX::Op::PublishAvail;
+use Catmandu::AlephX::Op::IllGetDoc;
+
 
 has url => (
   is => 'ro',
@@ -523,12 +525,46 @@ if($publish->is_success){
   say STDERR $publish->error;
 }
 
+=head3 remarks
+
+  The parameter 'doc_num' supports multiple values, separated by ','.
+  Compare this to ill_get_doc, that does not support this.
+
 =cut
 sub publish_avail {
   my($self,%args)=@_;
   $args{'op'} = "publish-avail";
   my $res = $self->_do_web_request(\%args);
   Catmandu::AlephX::Op::PublishAvail->parse($res->content_ref());
+}
+=head2 ill_get_doc
+
+=head3 documentation from Aleph X
+
+This service takes a document number and the library where the corresponding document is located and generates the XML of the requested document as it appears in the library given.
+
+=head3 example
+
+my $illgetdoc = $aleph->ill_get_doc(doc_number => '001317121',library=>'rug01');
+if($illgetdoc->is_success){
+
+  if($illgetdoc->record){
+    say "data: ".to_json($illgetdoc->record,{ pretty => 1 });
+  }
+  else{
+    say "nothing found";
+  }
+
+}else{
+  say STDERR $illgetdoc->error;
+}
+
+=cut
+sub ill_get_doc {
+  my($self,%args)=@_;
+  $args{'op'} = "ill-get-doc";
+  my $res = $self->_do_web_request(\%args);
+  Catmandu::AlephX::Op::IllGetDoc->parse($res->content_ref());
 }
 =head1 AUTHOR
 
