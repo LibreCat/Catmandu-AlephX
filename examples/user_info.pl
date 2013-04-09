@@ -15,6 +15,7 @@ my %args = (
 );
 my $info = $aleph->bor_info(%args);
 if($info->is_success){
+  
 
   my $z304 = $info->z304();
   my @keys = qw(z304-address-0 z304-address-1 z304-address-2 z304-address-3 z304-address-4 z304-email-address z304-date-from z304-date-to z304-zip z304-telephone z304-telephone-1 z304-telephone-2 z304-telephone-3 z304-telephone-4);
@@ -32,6 +33,11 @@ if($info->is_success){
   }
 
   
+  say sprintf("\t%20s : %s\b",'Loans (active)',scalar(@{$info->item_l->[0]->{z36}}));
+  say sprintf("\t%20s : %s\b",'Loans (history)','<not implemented>');
+  say sprintf("\t%20s : %s\b",'hold requests',scalar(@{$info->item_h->[0]->{z37} // []}));
+  say sprintf("\t%20s : %s\b",'Cash',$info->balance);
+
 }else{
   say STDERR "error: ".$info->error;
   exit 1;

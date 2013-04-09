@@ -9,10 +9,10 @@ use open qw(:std :utf8);
 my $aleph = Catmandu::AlephX->new(url => "http://aleph.ugent.be/X");
 
 my %args = (
-  library => "usm50",
+  library => "rug50",
   sub_library => "HIL",
-  bor_id => "00000012",
-  verification => "00000012"
+  bor_id => "demo",
+  verification => "demo"
 );
 my $auth = $aleph->bor_auth(%args);
 if($auth->is_success){

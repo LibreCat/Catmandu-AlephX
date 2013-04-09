@@ -9,18 +9,14 @@ use open qw(:std :utf8);
 my $aleph = Catmandu::AlephX->new(url => "http://aleph.ugent.be/X");
 
 my %args = (
-  library => "usm50",
-  bor_id => "00000012",
-  verification => "00000012"
+  library => "rug50",
+  bor_id => "demo",
+  verification => "demo"
 );
 my $info = $aleph->bor_info(%args);
 if($info->is_success){
-
-  print Dumper($info->z303);
-  print Dumper($info->z304);
-  print Dumper($info->z305);
-  print Dumper($info->fine);
-
+  print Dumper($info->item_l);
+  print Dumper($info->item_h);
 }else{
   say STDERR $info->error;
 } 

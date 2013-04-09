@@ -15,39 +15,39 @@ has query   => (is => 'ro', required => 1);
 has aleph   => (is => 'ro', init_arg => undef , lazy => 1 , builder => '_build_aleph');
 
 sub _build_aleph {
-    my ($self) = @_;
-    Catmandu::AlephX->new(url => $self->url);
+  my ($self) = @_;
+  Catmandu::AlephX->new(url => $self->url);
 }
 
 sub _fetch_items {
-    my ($self, $doc_number) = @_;
-    my $item_data = $self->aleph->item_data(base => $self->base, doc_number => $doc_number);
-    
-    return unless $item_data->is_success;
-    return $item_data->items;
+  my ($self, $doc_number) = @_;
+  my $item_data = $self->aleph->item_data(base => $self->base, doc_number => $doc_number);
+  
+  return unless $item_data->is_success;
+  return $item_data->items;
 }
 
 sub generator {
-    my ($self) = @_;
-    my $find    = $self->aleph->find(request => $self->query , base => $self->base);
-    
-    return sub {undef} unless $find->is_success;    
-    
-    sub {
-        state $set_number = $find->set_number;
-        state $no_records = int($find->no_records);
-        state $count = 0;
+  my ($self) = @_;
+  my $find    = $self->aleph->find(request => $self->query , base => $self->base);
+  
+  return sub {undef} unless $find->is_success;    
+  
+  sub {
+    state $set_number = $find->set_number;
+    state $no_records = int($find->no_records);
+    state $count = 0;
 
-        return if ($no_records == 0 || $count >= $no_records );
-        my $present = $self->aleph->present(set_number => $set_number , set_entry => sprintf("%-9.9d",++$count));
-        return unless $present->is_success;
-        return unless @{$present->records} == 1;
+    return if ($no_records == 0 || $count >= $no_records );
+    my $present = $self->aleph->present(set_number => $set_number , set_entry => sprintf("%-9.9d",++$count));
+    return unless $present->is_success;
+    return unless @{$present->records} == 1;
+ 
+    my $doc   = $present->records->[0];
+    my $items = $self->_fetch_items($doc->{doc_number});
     
-        my $doc   = $present->records->[0];
-        my $items = $self->_fetch_items($doc->{doc_number});
-        
-        { record => $doc->metadata->[0]->data , items => $items };
-    };
+    { record => $doc->metadata->[0]->data , items => $items };
+  };
 }
 
 =head1 NAME

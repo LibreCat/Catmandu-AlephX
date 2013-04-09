@@ -60,7 +60,7 @@ sub parse {
   }
 
   for my $child($xpath->find("/bor-info/item-l")->get_nodelist()){
-    $args->{'item-l'} //= [];
+    $args->{'item_l'} //= [];
 
     my $item_l = {};
     $item_l->{due_date} = $child->findvalue('./due-date');
@@ -73,7 +73,7 @@ sub parse {
       }
     }
     
-    push @{ $args->{'item-l'} },$item_l;
+    push @{ $args->{'item_l'} },$item_l;
 
   }
 

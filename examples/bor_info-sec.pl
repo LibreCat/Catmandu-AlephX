@@ -58,19 +58,10 @@ if($info->is_success){
       say "\t$key : $data->{$key}->[0]" if scalar(@{ $data->{$key} });
     }
   }
-  exit;
   say "fine:";
-  for my $fine(@{ $info->fine() }){
-    for my $type(qw(z13 z30 z31)){
-      say "\t$type:";
-      say "\tkey: $type";
+  print Dumper($info->fine);
 
-      my $data = $fine->{$type}->[0];
-      for my $key(keys %$data){
-        say "\t\t$key : $data->{$key}->[0]" if scalar(@{ $data->{$key} });
-      }
-    }          
-  }
+  print Dumper($info->item_l);
 
 }else{
   say STDERR "error: ".$info->error;
