@@ -26,7 +26,6 @@ lib/Catmandu/AlephX/Op/ReadItem.pm
 lib/Catmandu/AlephX/Record.pm
 lib/Catmandu/AlephX/Record/Present.pm
 lib/Catmandu/AlephX/Response.pm
-lib/Catmandu/AlephX/Sane.pm
 lib/Catmandu/AlephX/XPath/Helper.pm
 MANIFEST
 t/use.t
