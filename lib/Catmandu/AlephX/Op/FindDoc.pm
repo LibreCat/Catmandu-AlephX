@@ -24,8 +24,8 @@ sub parse {
 
   __PACKAGE__->new(
     record => Catmandu::AlephX::Record->new(metadata => \@metadata),
-    session_id => $xpath->findvalue('/find-doc/session-id')->value(),
-    error => $xpath->findvalue('/find-doc/error')->value()
+    session_id => $xpath->findvalue('/find-doc/session-id'),
+    error => $xpath->findvalue('/find-doc/error')
   );
   
 }

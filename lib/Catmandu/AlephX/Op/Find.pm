@@ -21,11 +21,11 @@ sub parse {
   my $xpath = xpath($str_ref);
 
   __PACKAGE__->new(
-    error => $xpath->findvalue('/find/error')->value(),
-    session_id => $xpath->findvalue('/find/session-id')->value(),
-    set_number => $xpath->findvalue('/find/set_number')->value(),
-    no_records => $xpath->findvalue('/find/no_records')->value(),
-    no_entries => $xpath->findvalue('/find/no_entries')->value()
+    error => $xpath->findvalue('/find/error'),
+    session_id => $xpath->findvalue('/find/session-id'),
+    set_number => $xpath->findvalue('/find/set_number'),
+    no_records => $xpath->findvalue('/find/no_records'),
+    no_entries => $xpath->findvalue('/find/no_entries')
   ); 
 }
 

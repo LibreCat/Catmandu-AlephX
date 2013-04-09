@@ -55,8 +55,8 @@ sub parse {
 
   __PACKAGE__->new(
     %args,
-    session_id => $xpath->findvalue('/bor-auth/session-id')->value(),
-    error => $xpath->findvalue('/bor-auth/error')->value()
+    session_id => $xpath->findvalue('/bor-auth/session-id'),
+    error => $xpath->findvalue('/bor-auth/error')
   ); 
 
 }

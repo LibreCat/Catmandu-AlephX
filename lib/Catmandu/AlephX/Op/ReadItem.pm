@@ -31,8 +31,8 @@ sub parse {
   }    
 
   __PACKAGE__->new(
-    session_id => $xpath->findvalue('/read-item/session-id')->value(),
-    error => $xpath->findvalue('/read-item/error')->value(),
+    session_id => $xpath->findvalue('/read-item/session-id'),
+    error => $xpath->findvalue('/read-item/error'),
     z30 => \@z30
   );
 }

@@ -63,8 +63,8 @@ sub parse {
     $args->{'item-l'} //= [];
 
     my $item_l = {};
-    $item_l->{due_date} = $child->findvalue('./due-date')->value();
-    $item_l->{due_hour} = $child->findvalue('./due-hour')->value();
+    $item_l->{due_date} = $child->findvalue('./due-date');
+    $item_l->{due_hour} = $child->findvalue('./due-hour');
 
     for my $key(qw(z36 z30 z13)){
       for my $data($child->find("./$key")->get_nodelist()){
@@ -93,8 +93,8 @@ sub parse {
     %$args,
     balance => $xpath->findvalue('/bor-info/balance'),
     sign => $xpath->findvalue('/bor-info/sign'),
-    session_id => $xpath->findvalue('/bor-info/session-id')->value(),
-    error => $xpath->findvalue('/bor-info/error')->value()
+    session_id => $xpath->findvalue('/bor-info/session-id'),
+    error => $xpath->findvalue('/bor-info/error')
   );
 
 }

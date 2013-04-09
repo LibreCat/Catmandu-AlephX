@@ -8,12 +8,12 @@ sub parse {
 
   my @marc = ();
 
-  my $leader = $xpath->findvalue('./leader')->value();
+  my $leader = $xpath->findvalue("./*[local-name() = 'leader']");
   my $fmt = "";
 
-  for my $controlfield($xpath->find('./controlfield')->get_nodelist()){
-    my $tag = $controlfield->findvalue('@tag')->value();
-    my $value = $controlfield->findvalue('.')->value();
+  for my $controlfield($xpath->find("./*[local-name() = 'controlfield']")->get_nodelist()){
+    my $tag = $controlfield->findvalue('@tag');
+    my $value = $controlfield->findvalue('.');
     if($tag eq "FMT"){
       $fmt = $value;
       next;
@@ -28,17 +28,17 @@ sub parse {
 
   unshift @marc,['FMT','','','_',$fmt],['LDR','','','_',$leader];
 
-  for my $datafield($xpath->find('./datafield')->get_nodelist()){
+  for my $datafield($xpath->find("./*[local-name() = 'datafield']")->get_nodelist()){
 
-    my $tag = $datafield->findvalue('@tag')->value();
-    my $ind1 = $datafield->findvalue('@ind1')->value();
-    my $ind2 = $datafield->findvalue('@ind2')->value();
+    my $tag = $datafield->findvalue('@tag');
+    my $ind1 = $datafield->findvalue('@ind1');
+    my $ind2 = $datafield->findvalue('@ind2');
 
     my @subf = ();
 
-    foreach my $subfield($datafield->find('./subfield')->get_nodelist()) {
-      my $code  = $subfield->findvalue('@code')->value();
-      my $value = $subfield->findvalue('.')->value();
+    foreach my $subfield($datafield->find("./*[local-name() = 'subfield']")->get_nodelist()) {
+      my $code  = $subfield->findvalue('@code');
+      my $value = $subfield->findvalue('.');
       push @subf,$code,$value;
     }
 

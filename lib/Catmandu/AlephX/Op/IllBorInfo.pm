@@ -36,8 +36,8 @@ sub parse {
 
   __PACKAGE__->new(
     %args,
-    session_id => $xpath->findvalue('/ill-bor-info/session-id')->value(),
-    error => $xpath->findvalue('/ill-bor-info/error')->value()
+    session_id => $xpath->findvalue('/ill-bor-info/session-id'),
+    error => $xpath->findvalue('/ill-bor-info/error')
   );
   
 }

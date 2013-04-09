@@ -34,10 +34,10 @@ sub parse {
     push @items,get_children($item);
   }
   __PACKAGE__->new(
-    session_id => $xpath->findvalue("/$op/session-id")->value(),
-    error => $xpath->findvalue("/$op/error")->value(),
+    session_id => $xpath->findvalue("/$op/session-id"),
+    error => $xpath->findvalue("/$op/error"),
     items => \@items,
-    start_point => $xpath->findvalue("/$op/start-point")->value()
+    start_point => $xpath->findvalue("/$op/start-point")
   );
 } 
 

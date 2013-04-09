@@ -3,15 +3,15 @@ use strict;
 use Module::Build;
 
 my $requires = {
-  perl => '>=5.10.1',
-  'XML::XPath' => 0,
+  perl => '>=5.10.1', 
+  Carp => 0,
+  'XML::LibXML' => 0,
+  'XML::LibXML::XPathContext' => 0,
   'Moo' => 0,
   'URI::Escape' => 0,
   'LWP::UserAgent' => 0,
   'Data::Util' => 0,
-  'Catmandu' => '0.09',
   Catmandu => 0,
-  #'Catmandu::Importer::MARC' => 0
 };
 my $recommends = {
   'Term::ReadKey' => 0

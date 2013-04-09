@@ -46,7 +46,8 @@ if($auth->is_success){
     say "$type:";
     my $data = $auth->$type();
     for my $key(keys %$data){
-      say "\t$key : $data->{$key}->[0]";
+      next unless($data->{$key}->[0]);
+      say "\t$key : '$data->{$key}->[0]'";
     }
   }
 

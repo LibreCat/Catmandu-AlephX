@@ -31,10 +31,10 @@ sub parse {
   }
 
   __PACKAGE__->new(
-    start_point => $xpath->findvalue("/$op/start-point")->value(),
+    start_point => $xpath->findvalue("/$op/start-point"),
     item_data => \@item_data,
-    session_id => $xpath->findvalue("/$op/session-id")->value(),
-    error => $xpath->findvalue("/$op/error")->value()
+    session_id => $xpath->findvalue("/$op/session-id"),
+    error => $xpath->findvalue("/$op/error")
   );
   
 }

@@ -30,8 +30,8 @@ sub parse {
     push @items,get_children($item);
   }
   __PACKAGE__->new(
-    session_id => $xpath->findvalue('/item-data/session-id')->value(),
-    error => $xpath->findvalue('/item-data/error')->value(),
+    session_id => $xpath->findvalue('/item-data/session-id'),
+    error => $xpath->findvalue('/item-data/error'),
     items => \@items
   );
 } 

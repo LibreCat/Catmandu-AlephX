@@ -27,8 +27,8 @@ sub parse {
   $z36 = get_children($z) if $z;
 
   __PACKAGE__->new(
-    session_id => $xpath->findvalue('/ill-LOAN-INFO/session-id')->value(),
-    error => $xpath->findvalue('/ill-LOAN-INFO/error')->value(),
+    session_id => $xpath->findvalue('/ill-LOAN-INFO/session-id'),
+    error => $xpath->findvalue('/ill-LOAN-INFO/error'),
     z36 => $z36
   );
 }

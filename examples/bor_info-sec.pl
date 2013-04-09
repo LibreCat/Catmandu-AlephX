@@ -50,8 +50,6 @@ my %args = (
 my $info = $aleph->bor_info(%args);
 if($info->is_success){
 
-  print Dumper($info);
-
   for my $type(qw(z303 z304 z305)){
     say "$type:";
     my $data = $info->$type();

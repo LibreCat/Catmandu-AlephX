@@ -26,8 +26,8 @@ sub parse {
 
   __PACKAGE__->new(
     item_data => \@item_data,
-    session_id => $xpath->findvalue("/$op/session-id")->value(),
-    error => $xpath->findvalue("/$op/error")->value()
+    session_id => $xpath->findvalue("/$op/session-id"),
+    error => $xpath->findvalue("/$op/error")
   );
   
 }

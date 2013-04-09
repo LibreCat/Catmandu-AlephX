@@ -1,5 +1,6 @@
 package Catmandu::AlephX;
 use Catmandu::Sane;
+use Carp qw(confess);
 use Moo;
 use LWP::UserAgent;
 use URI::Escape;
