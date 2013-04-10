@@ -22,6 +22,8 @@ use Catmandu::AlephX::Op::CircStatM;
 use Catmandu::AlephX::Op::PublishAvail;
 use Catmandu::AlephX::Op::IllGetDoc;
 
+our $VERSION = 1.0;
+
 
 has url => (
   is => 'ro',

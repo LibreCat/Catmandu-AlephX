@@ -26,6 +26,14 @@ my $build = Module::Build->new(
   dist_abstract => 'Low level api for Aleph X Services',
   requires => $requires,
   recommends => $recommends,
-  create_license => 1
+  build_requires => {
+    'Software::License' => 0,
+    'Test::Exception' => 0,
+    'Test::More' => 0,
+  },
+  create_license => 1,
+  license => 'perl',
+  dist_version_from => 'lib/Catmandu/AlephX.pm',
+  create_makefile_pl => 'traditional'  
 );
 $build->create_build_script;
