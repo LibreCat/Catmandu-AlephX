@@ -45,4 +45,7 @@ lib/Catmandu/AlephX/Response.pm
 lib/Catmandu/AlephX/XPath/Helper.pm
 lib/Catmandu/Importer/AlephX.pm
 MANIFEST
-t/use.t
+Makefile.PL
+LICENSE
+META.yml
+META.json

@@ -3,7 +3,7 @@ use strict;
 use Module::Build;
 
 my $requires = {
-  perl => '>=5.10.1', 
+  perl => '5.10.0', 
   Carp => 0,
   'XML::LibXML' => 0,
   'XML::LibXML::XPathContext' => 0,
@@ -17,8 +17,7 @@ my $recommends = {
   'Term::ReadKey' => 0
 };
 my $build = Module::Build->new(
-  module_name => 'Low level api for Aleph X Services',
-  dist_version => '0.01',
+  module_name => 'Catmandu::AlephX',
   dist_author => [
     'Nicolas Franck <nicolas.franck@ugent.be>',
     'Patrick Hochstenbach <patrick.hochstenbach@ugent.be>',
