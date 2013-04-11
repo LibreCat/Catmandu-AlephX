@@ -21,6 +21,9 @@ use Catmandu::AlephX::Op::CircStatus;
 use Catmandu::AlephX::Op::CircStatM;
 use Catmandu::AlephX::Op::PublishAvail;
 use Catmandu::AlephX::Op::IllGetDoc;
+use Catmandu::AlephX::Op::Renew;
+use Catmandu::AlephX::Op::HoldReq;
+use Catmandu::AlephX::Op::HoldReqCancel;
 
 our $VERSION = 1.0;
 
@@ -82,7 +85,7 @@ sub _construct_params_as_array {
         if(is_array_ref($params->{$key})){
             #PHP only recognizes 'arrays' when their keys are appended by '[]' (yuk!)
             for my $val(@{ $params->{$key} }){
-                push @array,$key."[]" => $val;
+                push @array,$key => $val;
             }
         }else{
             push @array,$key => $params->{$key};
@@ -149,7 +152,7 @@ For each of the document's items it retrieves:
 =cut
 sub item_data {
   my($self,%args)=@_;
-  $args{'op'} = "item-data";
+  $args{'op'} = Catmandu::AlephX::Op::ItemData->op();
   my $res = $self->_do_web_request(\%args);
   Catmandu::AlephX::Op::ItemData->parse($res->content_ref());    
 }
@@ -184,7 +187,7 @@ It is similar to the item_data X-service, except for the parameter START_POINT, 
 =cut
 sub item_data_multi {
   my($self,%args)=@_;
-  $args{'op'} = "item-data-multi";
+  $args{'op'} = Catmandu::AlephX::Op::ItemDataMulti->op();
   my $res = $self->_do_web_request(\%args);
   Catmandu::AlephX::Op::ItemDataMulti->parse($res->content_ref());    
 }
@@ -213,7 +216,7 @@ sub item_data_multi {
 
 sub read_item {
   my($self,%args)=@_;
-  $args{'op'} = "read-item";
+  $args{'op'} = Catmandu::AlephX::Op::ReadItem->op();
   my $res = $self->_do_web_request(\%args);
   Catmandu::AlephX::Op::ReadItem->parse($res->content_ref());    
 }
@@ -246,7 +249,7 @@ sub read_item {
 =cut
 sub find {
   my($self,%args)=@_;
-  $args{op} = 'find';
+  $args{'op'} = Catmandu::AlephX::Op::Find->op();
   my $res = $self->_do_web_request(\%args);
   Catmandu::AlephX::Op::Find->parse($res->content_ref());    
 }
@@ -275,7 +278,7 @@ sub find {
 =cut
 sub find_doc {
   my($self,%args)=@_;
-  $args{op} = 'find-doc';
+  $args{'op'} = Catmandu::AlephX::Op::FindDoc->op();
   my $res = $self->_do_web_request(\%args);
   Catmandu::AlephX::Op::FindDoc->parse($res->content_ref());    
 }
@@ -310,11 +313,8 @@ sub find_doc {
 =cut
 sub present {
   my($self,%args)=@_;
-  $args{op} = 'present';
+  $args{'op'} = Catmandu::AlephX::Op::Present->op();
   my $res = $self->_do_web_request(\%args);
-  open F,">/tmp/log";
-  print F $res->content();
-  close F;
   Catmandu::AlephX::Op::Present->parse($res->content_ref());    
 }
 
@@ -342,7 +342,7 @@ sub present {
 =cut
 sub ill_get_doc_short {
   my($self,%args)=@_;
-  $args{op} = 'ill-get-doc-short';
+  $args{'op'} = Catmandu::AlephX::Op::IllGetDocShort->op();
   my $res = $self->_do_web_request(\%args);
   Catmandu::AlephX::Op::IllGetDocShort->parse($res->content_ref());    
 }
@@ -380,7 +380,7 @@ sub ill_get_doc_short {
 =cut
 sub bor_auth {
   my($self,%args)=@_;
-  $args{op} = 'bor-auth';
+  $args{'op'} = Catmandu::AlephX::Op::BorAuth->op();
   my $res = $self->_do_web_request(\%args);
   Catmandu::AlephX::Op::BorAuth->parse($res->content_ref());
 } 
@@ -430,7 +430,7 @@ sub bor_auth {
 =cut
 sub bor_info {
   my($self,%args)=@_;
-  $args{op} = 'bor-info';
+  $args{'op'} = Catmandu::AlephX::Op::BorInfo->op();
   my $res = $self->_do_web_request(\%args);
   Catmandu::AlephX::Op::BorInfo->parse($res->content_ref());
 }
@@ -446,14 +446,14 @@ sub bor_info {
 =cut
 sub ill_bor_info {
   my($self,%args)=@_;
-  $args{op} = 'ill-bor-info';
+  $args{'op'} = Catmandu::AlephX::Op::IllBorInfo->op();
   my $res = $self->_do_web_request(\%args);
   Catmandu::AlephX::Op::IllBorInfo->parse($res->content_ref());
 }
 
 sub ill_loan_info {
   my($self,%args)=@_;
-  $args{'op'} = "ill-loan-info";
+  $args{'op'} = Catmandu::AlephX::Op::IllLoanInfo->op();
   my $res = $self->_do_web_request(\%args);
   Catmandu::AlephX::Op::IllLoanInfo->parse($res->content_ref());
 }
@@ -472,7 +472,7 @@ The service retrieves the circulation status for each document number entered by
 =cut
 sub circ_status {
   my($self,%args)=@_;
-  $args{'op'} = "circ-status";
+  $args{'op'} = Catmandu::AlephX::Op::CircStatus->op();
   my $res = $self->_do_web_request(\%args);
   Catmandu::AlephX::Op::CircStatus->parse($res->content_ref());
 }
@@ -493,7 +493,7 @@ This service is similar to circ-status X-service, except for the parameter START
 =cut
 sub circ_stat_m {
   my($self,%args)=@_;
-  $args{'op'} = "circ-stat-m";
+  $args{'op'} = Catmandu::AlephX::Op::CircStatM->op();
   my $res = $self->_do_web_request(\%args);
   Catmandu::AlephX::Op::CircStatM->parse($res->content_ref());
 }
@@ -536,7 +536,7 @@ if($publish->is_success){
 =cut
 sub publish_avail {
   my($self,%args)=@_;
-  $args{'op'} = "publish-avail";
+  $args{'op'} = Catmandu::AlephX::Op::PublishAvail->op();
   my $res = $self->_do_web_request(\%args);
   Catmandu::AlephX::Op::PublishAvail->parse($res->content_ref());
 }
@@ -565,9 +565,46 @@ if($illgetdoc->is_success){
 =cut
 sub ill_get_doc {
   my($self,%args)=@_;
-  $args{'op'} = "ill-get-doc";
+  $args{'op'} = Catmandu::AlephX::Op::IllGetDoc->op();
   my $res = $self->_do_web_request(\%args);
   Catmandu::AlephX::Op::IllGetDoc->parse($res->content_ref());
+}
+=head2 renew
+
+=head3 documentation from Aleph X
+
+  This service renews the loan of a given item for a given patron.
+  The X-Service renews the loan only if it can be done. If, for example, there is a delinquency on the patron, the service does not renew the loan.
+
+=head3 example
+
+=cut
+sub renew {
+  my($self,%args)=@_;
+  $args{'op'} = Catmandu::AlephX::Op::Renew->op();
+  my $res = $self->_do_web_request(\%args);
+  Catmandu::Alephx::Op::Renew->parse($res->content_ref());
+}
+=head2 hold_req
+
+=head3 documentation from Aleph X
+
+The service creates a hold-request record (Z37) for a given item after performing initial checks.
+
+=head3 example
+
+=cut
+sub hold_req {
+  my($self,%args)=@_;
+  $args{'op'} = Catmandu::AlephX::Op::HoldReq->op();
+  my $res = $self->_do_web_request(\%args);
+  Catmandu::Alephx::Op::HoldReq->parse($res->content_ref());
+}
+sub hold_req_cancel {
+  my($self,%args)=@_;
+  $args{'op'} = Catmandu::AlephX::Op::HoldReqCancel->op();
+  my $res = $self->_do_web_request(\%args);
+  Catmandu::Alephx::Op::HoldReqCancel->parse($res->content_ref());
 }
 =head1 AUTHOR
 
