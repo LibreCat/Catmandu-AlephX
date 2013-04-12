@@ -50,6 +50,12 @@ provides:
   Catmandu::AlephX::Op::GetHolding:
     file: lib/Catmandu/AlephX/Op/GetHolding.pm
     version: 0
+  Catmandu::AlephX::Op::HoldReq:
+    file: lib/Catmandu/AlephX/Op/HoldReq.pm
+    version: 0
+  Catmandu::AlephX::Op::HoldReqCancel:
+    file: lib/Catmandu/AlephX/Op/HoldReqCancel.pm
+    version: 0
   Catmandu::AlephX::Op::IllBorInfo:
     file: lib/Catmandu/AlephX/Op/IllBorInfo.pm
     version: 0
@@ -76,6 +82,9 @@ provides:
     version: 0
   Catmandu::AlephX::Op::ReadItem:
     file: lib/Catmandu/AlephX/Op/ReadItem.pm
+    version: 0
+  Catmandu::AlephX::Op::Renew:
+    file: lib/Catmandu/AlephX/Op/Renew.pm
     version: 0
   Catmandu::AlephX::Record:
     file: lib/Catmandu/AlephX/Record.pm
