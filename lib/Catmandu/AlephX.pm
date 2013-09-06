@@ -6,7 +6,7 @@ use LWP::UserAgent;
 use URI::Escape;
 use Data::Util qw(:check :validate);
 
-our $VERSION = "1.04";
+our $VERSION = "1.05";
 
 has url => (
   is => 'ro',
