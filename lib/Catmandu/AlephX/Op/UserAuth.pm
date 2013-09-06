@@ -1,33 +1,34 @@
-package Catmandu::AlephX::Op::Renew;
+package Catmandu::AlephX::Op::UserAuth;
 use Catmandu::Sane;
 use Data::Util qw(:check :validate);
 use Moo;
 
 with('Catmandu::AlephX::Response');
 
+has z66 => (
+  is => 'ro',
+  isa => sub{
+    hash_ref($_[0]);
+  }
+); 
 has reply => (
   is => 'ro'
-); 
-has due_date => (
-  is => 'ro'
 );
-has due_hour => (
-  is => 'ro'
-);
-
-sub op { 'renew' }
+sub op { 'user-auth' }
 
 sub parse {
   my($class,$str_ref) = @_;
   my $xpath = xpath($str_ref);
   my $op = op();
 
+  my($z66) = $xpath->find('/z66')->get_nodelist();
+  $z66 = get_children($z66,1);
+
   __PACKAGE__->new(
     session_id => $xpath->findvalue('/'.$op.'/session-id'),
-    error => $xpath->findvalue("/$op/error|/$op/error-text-1|/$op/error-text-2"),    
+    error => $xpath->findvalue('/'.$op.'/error'),    
     reply => $xpath->findvalue('/'.$op.'/reply'),
-    due_date => $xpath->findvalue('/'.$op.'/due-date'),
-    due_hour => $xpath->findvalue('/'.$op.'/due-hour')
+    z66 => $z66
   );
 } 
 
