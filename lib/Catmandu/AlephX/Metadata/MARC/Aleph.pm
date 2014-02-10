@@ -1,8 +1,10 @@
 package Catmandu::AlephX::Metadata::MARC::Aleph;
 use Catmandu::Sane;
+use Catmandu::Util qw(:array);
 use Moo;
 extends qw(Catmandu::AlephX::Metadata);
 
+#parse aleph oai marc into catmandu marc array
 sub parse {
   my($class,$xpath)=@_;
  
@@ -33,6 +35,46 @@ sub parse {
   }
 
   __PACKAGE__->new(type => 'oai_marc',data => \@marc); 
+}
+sub escape_value {
+  my $data = $_[0];
+  $data =~ s/&/&amp;/sg;
+  $data =~ s/</&lt;/sg;
+  $data =~ s/>/&gt;/sg;
+  $data =~ s/"/&quot;/sg;
+  $data;
+}
+sub to_xml {
+  my($class,$array)=@_;
+
+  my @xml = "<oai_marc>";
+
+  for my $field(@$array){
+    my($tag,$ind1,$ind2,@subfields)= @$field;
+
+    if(array_includes([qw(FMT LDR)],$tag) || $tag =~ /^00/o){
+     
+      push @xml,"<fixfield id=\"$tag\">";
+      push @xml,escape_value($subfields[1]);
+      push @xml,"</fixfield>";
+ 
+    }else{
+
+      push @xml,"<varfield id=\"$tag\" i1=\"$ind1\" i2=\"$ind2\">";
+      for(my $i = 0;$i < scalar(@subfields);$i+=2){
+        my $label = $subfields[$i];
+        my $value = $subfields[$i+1];
+        push @xml,"<subfield label=\"$label\">".escape_value($value)."</subfield>";
+      }
+      push @xml,"</varfield>";
+
+    }
+
+  }
+
+  push @xml,"</oai_marc>";
+
+  join('',@xml);
 }
 
 1;

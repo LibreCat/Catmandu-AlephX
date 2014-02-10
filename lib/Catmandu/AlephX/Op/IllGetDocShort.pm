@@ -19,16 +19,21 @@ sub parse {
   my($class,$str_ref) = @_;
   my $xpath = xpath($str_ref);
 
+  my $op = op();
+
   my $z13 = {};
 
-  my($z) = $xpath->find('/ill-get-doc-short/z13')->get_nodelist();
+  my($z) = $xpath->find("/$op/z13")->get_nodelist();
 
   $z13 = get_children($z) if $z;
 
+  my @errors = map { $_->to_literal; } $xpath->find("/$op/error")->get_nodelist();
+
   __PACKAGE__->new(
-    session_id => $xpath->findvalue('/ill-get-doc-short/session-id'),
-    error => $xpath->findvalue('/ill-get-doc-short/error'),
-    z13 => $z13
+    session_id => $xpath->findvalue("/$op/session-id"),
+    errors => \@errors,
+    z13 => $z13,
+    content_ref => $str_ref
   );
 }
 

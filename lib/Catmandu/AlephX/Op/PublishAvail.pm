@@ -35,10 +35,13 @@ sub parse {
     }
   }
 
+  my @errors = map { $_->to_literal; } $xpath->find("/$op/error")->get_nodelist();
+
   __PACKAGE__->new(
-    error => $xpath->findvalue("/$op/error"),
+    errors => \@errors,
     session_id => $xpath->findvalue("/$op/session-id"),
-    list => \@list
+    list => \@list,
+    content_ref => $str_ref
   ); 
 }
 

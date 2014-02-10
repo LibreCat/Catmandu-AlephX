@@ -6,7 +6,7 @@ use LWP::UserAgent;
 use URI::Escape;
 use Data::Util qw(:check :validate);
 
-our $VERSION = "1.05";
+our $VERSION = "1.06";
 
 has url => (
   is => 'ro',
@@ -84,13 +84,15 @@ sub _get {
 
 =head1 SYNOPSIS
 
-  my $aleph = Catmandu::AlephX->new(url => "http://aleph.ugent.be");
+  my $aleph = Catmandu::AlephX->new(url => "http://localhost/X");
   my $item_data = $aleph->item_data(base => "rug01",doc_number => "001484477");
 
 
   #all public methods return a Catmandu::AlephX::Response
   # 'is_success' means that the xml-response did not contain the element 'error'
+  # most methods return only one 'error', but some (like update_doc) multiple.
   # other errors are thrown (xml parse error, no connection ..)
+  
 
   if($item_data->is_success){
 
@@ -98,7 +100,7 @@ sub _get {
 
   }else{
 
-    say "aleph x server returned error-response: ".$item_data->error;
+    say "aleph x server returned error-response: ".join("\n",@{$item_data->errors});
 
   }
 
@@ -122,7 +124,7 @@ For each of the document's items it retrieves:
       print Dumper($item);
     };
   }else{
-    print STDERR $item_data->error."\n";
+    print STDERR join("\n",@{$item_data->errors})."\n";
   }
 
 =head3 remarks
@@ -155,7 +157,7 @@ It is similar to the item_data X-service, except for the parameter START_POINT, 
       print Dumper($item);
     };
   }else{
-    print STDERR $item_data_m->error."\n";
+    print STDERR join("\n",@{$item_data_m->errors})."\n";
   }
 
   say "items retrieved, starting at ".$item_data_m->start_point() if $item_data_m->start_point();
@@ -187,7 +189,7 @@ sub item_data_multi {
       print Dumper($z30);
     }
   }else{
-    say STDERR $readitem->error;
+    say STDERR join("\n",@{$readitem->errors});
   }
 
 =head3 remarks
@@ -218,7 +220,7 @@ sub read_item {
     say "no_records: ".$find->no_records;
     say "no_entries: ".$find->no_entries;
   }else{
-    say STDERR $find->error;
+    say STDERR join("\n",@{$find->errors});
   }
 
 =head3 remarks
@@ -252,7 +254,7 @@ sub find {
       say Dumper($record);
     }
   }else{
-    say STDERR $find->error;
+    say STDERR join("\n",@{$find->errors});
   }
 
 =head3 remarks
@@ -288,7 +290,7 @@ sub find_doc {
       say "\tmetadata: ".$metadata->type;
     }
   }else{
-    say STDERR $present->error;
+    say STDERR join("\n",@{$present->errors});
   }
 
 =head3 remarks
@@ -318,7 +320,7 @@ sub present {
       print Dumper($z30);
     }
   }else{
-    say STDERR $result->error;
+    say STDERR join("\n",@{$result->errors});
   }
 
 =head3 remarks
@@ -360,7 +362,7 @@ sub ill_get_doc_short {
     }
 
   }else{
-    say STDERR "error: ".$auth->error;
+    say STDERR "error: ".join("\n",@{$auth->errors});
     exit 1;
   }
 
@@ -411,7 +413,7 @@ sub bor_auth {
     }
 
   }else{
-    say STDERR "error: ".$info->error;
+    say STDERR "error: ".join("\n",@{$info->errors});
     exit 1;
   }
 
@@ -518,7 +520,7 @@ if($publish->is_success){
     say "\n---";
   }
 }else{
-  say STDERR $publish->error;
+  say STDERR join("\n",@{$publish->errors});
 }
 
 =head3 remarks
@@ -553,7 +555,7 @@ if($illgetdoc->is_success){
   }
 
 }else{
-  say STDERR $illgetdoc->error;
+  say STDERR join("\n",@{$illgetdoc->errors});
 }
 
 =cut
@@ -610,6 +612,163 @@ sub user_auth {
   $args{op} = Catmandu::AlephX::Op::UserAuth->op();
   my $res = $self->_do_web_request(\%args);
   Catmandu::AlephX::Op::UserAuth->parse($res->content_ref());
+}
+=head2 update_doc
+
+=head3 documentation from Aleph X
+
+  The service performs actions (Update / Insert / Delete) related to the update of a document.
+  (The service uses pc_cat_c0203 which updates a document via the GUI).
+
+=head3 notes
+
+  When executing an update request, most of the 'errors' will be warnings instead of real errors.
+  This happens because AlephX performs an 'UPDATE-CHK' before trying to execute an 'UPDATE',
+  and stores all warnings during that check in the xml attribute 'error'.
+
+  Therefore the method 'is_success' of the Catmandu::AlephX::Response is not very usefull in this case.
+  Search for the last 'error', and check wether it contains 'updated successfully'.
+
+=head3 warnings
+
+  An updates replaces the WHOLE record. So if you fail to supply 'xml_full_req' (or indirectly 'marc'),
+  the record will be deleted!
+
+  To be sure, please use the full xml response of 'find-doc', change the fields inside 'oai_marc', and
+  supply this xml as xml_full_req.
+
+  Every updates adds a CAT-field to the record. Your updates can be recognized by CAT$$a == "WWW-X".
+  When updating a record you need to include the old CAT fields (default), otherwise these fields will be deleted
+  (and all history will be lost).
+
+  "Unlike other X-Services, the parameters can include XML up to 20,000 characters in length"
+
+  When you update often (and therefore add a lot of CAT fields), this can lead to the error 'Server closed connection'.
+  This is due to the maximum of characters allowed in an XML request. 
+
+  Possible solution: 
+    1. retrieve record by 'find_doc'
+    2. get marc record: 
+
+        my $marc = $res->record->metadata->[0]->data
+
+    3. filter out your CAT fields ($a == "WWW-X") to shorten the XML:
+        
+        $marc = [grep { !( $_->[0] eq "CAT" && $_->[4] eq "WWW-X" ) } @$marc];
+
+    4. update $marc
+    5. send
+
+        $aleph->update_doc(library => 'usm01',doc_action => 'UPDATE',doc_number => $doc_number,marc => $marc);
+
+        => your xml will now contain one CAT field with subfield 'a' equal to 'WWW-X'.
+
+=head3 example
+
+  my $aleph = Catmandu::AlephX->new(url => "http://localhost/X");
+
+  my $doc_number = '000000444';
+  my $find_doc = $aleph->find_doc(
+    doc_num => $doc_number,
+    base => "usm01"
+  );
+  my $marc = $find_doc->record->metadata->[0]->data;
+  my $content_ref = $find_doc->content_ref;
+
+  my %args = (
+    'library' => 'usm01',
+    'doc_action' => 'UPDATE',
+    'doc_number' => $doc_number,
+    xml_full_req => $$content_ref
+  );
+  my $u = $aleph->update_doc(%args);
+  if($u->is_success){
+    say "all ok";
+  }else{
+    say STDERR join("\n",@{$u->errors});
+  }
+
+=head3 special support for catmandu marc records
+
+  when you supply the argument 'marc', an xml document will be created for you,
+  and stored in the argument 'xml_full_req'. 'marc' must be an array of arrays.
+  When you already supplied 'xml_full_req', it will be overwritten.
+
+=cut
+sub update_doc {
+  my($self,%args)=@_;
+  require Catmandu::AlephX::Op::UpdateDoc;
+  $args{op} = Catmandu::AlephX::Op::UpdateDoc->op();
+
+  if($args{marc}){
+    require Catmandu::AlephX::Metadata::MARC::Aleph;
+    my $m = Catmandu::AlephX::Metadata::MARC::Aleph->to_xml($args{marc});
+    my $xml = <<EOF;
+<?xml version = "1.0" encoding = "UTF-8"?>
+<find-doc>
+  <record>
+    <metadata>
+    $m
+    </metadata>
+  </record>
+</find-doc>
+EOF
+    $args{xml_full_req} = $xml;
+  }
+
+  my $res = $self->_do_web_request(\%args,"POST");
+  Catmandu::AlephX::Op::UpdateDoc->parse($res->content_ref());
+}
+=head2 update_item
+
+=head3 documentation from Aleph X
+
+  The service updates an existing item in the required ADM library after performing all relevant initial checks prior to that action.
+
+=head3 notes
+
+  AlephX stores not only errors in 'errors', but also the success message.
+
+  Therefore the method 'is_success' of the Catmandu::AlephX::Response is not very usefull in this case.
+  Search for the last 'error', and check wether it contains 'updated successfully'.
+
+  The result of 'read_item' often contains translations, instead of the real values. But these
+  translation cannot be used when updating items. 
+
+  e.g. z30-item-status contains 'Regular loan' instead of '001'. 
+
+=head3 example
+
+  my $alephx = Catmandu::AlephX->new(url => "http://localhost/X");
+  my $item_barcode = '32044044980076';
+
+  my %args = (
+    'library' => 'usm50',
+    'item_barcode' => $item_barcode,
+  );
+
+  my $z30 = $alephx->read_item(%args)->z30(); 
+
+  my $xml = XMLout($z30,,RootName=>"z30",NoAttr => 1);
+  $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n".$xml; 
+
+  $args{xml_full_req} = $xml;
+
+  my $u = alephx->update_item(%args);
+  if($u->is_success){
+    say "all ok";
+  }else{
+    say STDERR join("\n",@{$u->errors});
+  } 
+
+=cut
+
+sub update_item {
+  my($self,%args)=@_;
+  require Catmandu::AlephX::Op::UpdateItem;
+  $args{op} = Catmandu::AlephX::Op::UpdateItem->op();
+  my $res = $self->_do_web_request(\%args,"POST");
+  Catmandu::AlephX::Op::UpdateItem->parse($res->content_ref());
 }
 
 =head1 AUTHOR

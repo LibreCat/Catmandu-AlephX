@@ -12,6 +12,7 @@ our $VERSION = '0.02';
 has url     => (is => 'ro', required => 1);
 has base    => (is => 'ro', required => 1);
 has query   => (is => 'ro', required => 1);
+has include_items => (is => 'ro',required => 0,lazy => 1,default => sub { 1; });
 has aleph   => (is => 'ro', init_arg => undef , lazy => 1 , builder => '_build_aleph');
 
 sub _build_aleph {
@@ -44,7 +45,10 @@ sub generator {
     return unless @{$present->records} == 1;
  
     my $doc   = $present->records->[0];
-    my $items = $self->_fetch_items($doc->{doc_number});
+    my $items = [];
+    if($self->include_items){
+      $items = $self->_fetch_items($doc->{doc_number});
+    }
     
     { record => $doc->metadata->[0]->data , items => $items };
   };
@@ -65,8 +69,10 @@ Catmandu::Importer::AlephX - Package that imports metadata records from the Alep
                         );
 
     my $n = $importer->each(sub {
-        my $hashref = $_[0];
+        my $r = $_[0];
         # ...
+        say Dumper($r->{record});
+        say Dumper($r->{items});
     });
 
 =head1 METHODS
@@ -74,6 +80,62 @@ Catmandu::Importer::AlephX - Package that imports metadata records from the Alep
 =head2 new(url => '...' , base => '...' , query => '...')
 
 Create a new AlephX importer. Required parameters are the url baseUrl of the AlephX service, an Aleph 'base' catalog name and a 'query'.
+
+=head3 common parameters
+
+    url             base url of alephx service (e.g. "http://ram19:8995/X")
+    include_items   0|1. When set to '1', the items of every bibliographical record  are retrieved
+    
+=head3 alephx parameters
+
+    base    name of catalog in Aleph where you want to search    
+    query   the query of course
+
+=head3 output
+
+  {
+    record => [
+      [
+        'FMT',
+        '',
+        '',
+        '_',
+        'MX'
+      ],
+      [
+        'LDR',
+        '',
+        '',
+        '_',
+        '01236npca^22001937|^4500'
+      ]
+      ..
+    ],
+    items => [
+      {
+        'sub-library' => 'WID',
+        'chronological-k' => '',
+        'chronological-i' => '',
+        'library' => 'USM50',
+        'collection' => 'HD',
+        'call-no-1' => '$$2ZHCL$$hH 810.80.20',
+        'chronological-j' => '',
+        'requested' => 'N',
+        'expected' => 'N',
+        'barcode' => 'HWM4M4',
+        'description' => '',
+        'note' => '',
+        'item-status' => '01',
+        'rec-key' => '000048762000010',
+        'enumeration-a' => '',
+        'call-no-2' => '',
+        'enumeration-b' => '',
+        'enumeration-c' => '',
+        'on-hold' => 'N'
+      }
+    ]
+
+  }
 
 =head2 count
 

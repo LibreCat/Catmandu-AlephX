@@ -19,17 +19,21 @@ sub op { 'ill-loan-info' }
 sub parse {
   my($class,$str_ref) = @_;
   my $xpath = xpath($str_ref);
+  my $op = op();
 
   my $z36 = {};
 
-  my($z) = $xpath->find('/ill-LOAN-INFO/z36')->get_nodelist();
+  my($z) = $xpath->find("/ill-LOAN-INFO/z36")->get_nodelist();
 
   $z36 = get_children($z) if $z;
 
+  my @errors = map { $_->to_literal; } $xpath->find("/ill-LOAN-INFO/error")->get_nodelist();
+
   __PACKAGE__->new(
     session_id => $xpath->findvalue('/ill-LOAN-INFO/session-id'),
-    error => $xpath->findvalue('/ill-LOAN-INFO/error'),
-    z36 => $z36
+    errors => \@errors,
+    z36 => $z36,
+    content_ref => $str_ref
   );
 }
 

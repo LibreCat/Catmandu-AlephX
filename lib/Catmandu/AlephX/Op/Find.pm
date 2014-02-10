@@ -19,13 +19,17 @@ sub op { 'find' }
 sub parse {
   my($class,$str_ref) = @_;
   my $xpath = xpath($str_ref);
+  my $op = op();
+
+  my @errors = map { $_->to_literal; } $xpath->find("/$op/error")->get_nodelist();
 
   __PACKAGE__->new(
-    error => $xpath->findvalue('/find/error'),
-    session_id => $xpath->findvalue('/find/session-id'),
-    set_number => $xpath->findvalue('/find/set_number'),
-    no_records => $xpath->findvalue('/find/no_records'),
-    no_entries => $xpath->findvalue('/find/no_entries')
+    errors => \@errors,
+    session_id => $xpath->findvalue("/$op/session-id"),
+    set_number => $xpath->findvalue("/$op/set_number"),
+    no_records => $xpath->findvalue("/$op/no_records"),
+    no_entries => $xpath->findvalue("/$op/no_entries"),
+    content_ref => $str_ref
   ); 
 }
 

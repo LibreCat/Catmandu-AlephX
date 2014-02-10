@@ -22,5 +22,5 @@ if($present->is_success){
     }
   }
 }else{
-  say STDERR $present->error;
+  say STDERR join('',@{$present->errors});
 } 

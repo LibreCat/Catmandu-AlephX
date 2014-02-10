@@ -21,11 +21,15 @@ sub parse {
   my $op = op();
 
   my %args;
-  for(qw(session-id error reply)){
+  for(qw(session-id reply)){
     my $key = $_;
     $key =~ s/-/_/go;
     $args{$key} = $xpath->findvalue("/$op/$key");
   }
+
+  my @errors = map { $_->to_literal; } $xpath->find("/$op/error")->get_nodelist();
+  $args{errors} = \@errors; 
+  $args{content_ref} = $str_ref;
 
   __PACKAGE__->new(%args);
 }

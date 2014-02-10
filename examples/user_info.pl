@@ -39,6 +39,6 @@ if($info->is_success){
   say sprintf("\t%20s : %s\b",'Cash',$info->balance);
 
 }else{
-  say STDERR "error: ".$info->error;
+  say STDERR "error: ".join('',@{$info->errors});
   exit 1;
 } 

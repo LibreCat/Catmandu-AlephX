@@ -29,14 +29,16 @@ sub parse {
 
     #remove controlfield with tag 'FMT' and 'LDR' because Catmandu::Importer::MARC cannot handle these
     $record = Catmandu::AlephX::Metadata::MARC->parse($marc)->data();
-    say "record: $record";
 
   }
+  
+  my @errors = map { $_->to_literal; } $xpath->find("/$op/error")->get_nodelist();
 
   __PACKAGE__->new(
-    error => $xpath->findvalue("/$op/error"),
+    errors => \@errors,
     session_id => $xpath->findvalue("/$op/session-id"),
-    record => $record
+    record => $record,
+    content_ref => $str_ref
   ); 
 }
 

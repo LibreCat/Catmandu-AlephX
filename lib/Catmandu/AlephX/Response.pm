@@ -50,8 +50,23 @@ our %EXPORT_TAGS = (all=>[@EXPORT_OK]);
 =cut
 
 requires 'op';
-has error => (is => 'rw');
+has errors => (
+  is => 'rw',
+  isa => sub { array_ref($_[0]); },
+  lazy => 1,
+  default => sub { []; }
+);
+#deprecated, use $self->errors
+sub error {
+  warn "method 'error' is deprecated, and only return one error. Please use method 'errors' which gives you an array reference of all errors.";
+  $_[0]->errors()->[0];
+}
 has session_id => (is => 'rw');
-sub is_success { return !is_string($_[0]->error); }
+sub is_success { 
+  return !scalar(@{$_[0]->errors()}); 
+}
+has content_ref => (
+  is => 'rw'
+);
 
 1;

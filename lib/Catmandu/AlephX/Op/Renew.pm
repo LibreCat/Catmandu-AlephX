@@ -24,10 +24,11 @@ sub parse {
 
   __PACKAGE__->new(
     session_id => $xpath->findvalue('/'.$op.'/session-id'),
-    error => $xpath->findvalue("/$op/error|/$op/error-text-1|/$op/error-text-2"),    
+    errors => [$xpath->findvalue("/$op/error|/$op/error-text-1|/$op/error-text-2")],    
     reply => $xpath->findvalue('/'.$op.'/reply'),
     due_date => $xpath->findvalue('/'.$op.'/due-date'),
-    due_hour => $xpath->findvalue('/'.$op.'/due-hour')
+    due_hour => $xpath->findvalue('/'.$op.'/due-hour'),
+    content_ref => $str_ref
   );
 } 
 

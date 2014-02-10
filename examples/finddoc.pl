@@ -13,5 +13,5 @@ my $find = $aleph->find_doc(base=>'rug01',doc_num=>'000000444');
 if($find->is_success){
   say Dumper($find->record);
 }else{
-  say STDERR $find->error;
+  say STDERR join('',@{$find->errors});
 }

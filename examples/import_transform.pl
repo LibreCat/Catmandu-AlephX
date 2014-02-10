@@ -3,6 +3,7 @@ use FindBin;
 use lib "$FindBin::Bin/../lib";
 use Catmandu::Sane;
 use Catmandu::Importer::AlephX;
+use Catmandu::AlephX::Metadata::MARC::Aleph;
 use Data::Dumper;
 use open qw(:std :utf8);
 
@@ -13,6 +14,5 @@ Catmandu::Importer::AlephX->new(
   include_items => 1
 )->each(sub{
   my $record = shift;
-  print Dumper($record->{record});
-  print Dumper($record->{items});
+  say Catmandu::AlephX::Metadata::MARC::Aleph->to_xml($record->{record});
 });

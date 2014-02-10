@@ -24,10 +24,13 @@ sub parse {
     push @item_data,get_children($i,1);   
   }
 
+  my @errors = map { $_->to_literal; } $xpath->find("/$op/error")->get_nodelist();
+
   __PACKAGE__->new(
     item_data => \@item_data,
     session_id => $xpath->findvalue("/$op/session-id"),
-    error => $xpath->findvalue("/$op/error")
+    errors => \@errors,
+    content_ref => $str_ref
   );
   
 }

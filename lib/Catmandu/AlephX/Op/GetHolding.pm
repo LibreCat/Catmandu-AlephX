@@ -28,11 +28,14 @@ sub parse {
   for my $ch($xpath->find("/$op/cdl-holdings")->get_nodelist()){
     push @cdl_holdings,get_children($ch,1);
   }    
+  
+  my @errors = map { $_->to_literal; } $xpath->find("/$op/error")->get_nodelist();
 
   __PACKAGE__->new(
     cdl_holdings => \@cdl_holdings,
     session_id => $xpath->findvalue("/$op/session-id"),
-    error => $xpath->findvalue("/$op/error"),
+    errors => \@errors,
+    content_ref => $str_ref
   );
 }
 

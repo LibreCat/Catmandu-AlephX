@@ -33,11 +33,15 @@ sub parse {
   for my $item($xpath->find("/$op/item")->get_nodelist()){
     push @items,get_children($item,1);
   }
+
+  my @errors = map { $_->to_literal; } $xpath->find("/$op/error")->get_nodelist();
+
   __PACKAGE__->new(
     session_id => $xpath->findvalue("/$op/session-id"),
-    error => $xpath->findvalue("/$op/error"),
+    errors => \@errors,
     items => \@items,
-    start_point => $xpath->findvalue("/$op/start-point")
+    start_point => $xpath->findvalue("/$op/start-point"),
+    content_ref => $str_ref
   );
 } 
 

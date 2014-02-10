@@ -19,5 +19,5 @@ if($illgetdoc->is_success){
   }
 
 }else{
-  say STDERR $illgetdoc->error;
+  say STDERR join('',@{$illgetdoc->errors});
 } 

@@ -3,6 +3,8 @@ use Catmandu::Sane;
 use Moo;
 extends qw(Catmandu::AlephX::Metadata);
 
+#parse marcxml into Catmandu marc array
+
 sub parse {
   my($class,$xpath)=@_;
 

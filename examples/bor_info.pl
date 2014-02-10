@@ -18,5 +18,7 @@ if($info->is_success){
   print Dumper($info->item_l);
   print Dumper($info->item_h);
 }else{
-  say STDERR $info->error;
+  say "test";
+  say "num errors:".scalar(@{ $info->errors() });
+  #say STDERR join('',@{$info->errors});
 } 

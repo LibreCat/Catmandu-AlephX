@@ -30,5 +30,5 @@ if($publish->is_success){
     say "\n---";
   }
 }else{
-  say STDERR $publish->error;
+  say STDERR join('',@{$publish->errors});
 } 
