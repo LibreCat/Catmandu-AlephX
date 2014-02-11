@@ -9,6 +9,7 @@ with('Catmandu::AlephX::Response');
 has record => ( 
   is => 'ro'
 );
+
 sub op { 'find-doc' }
 
 sub parse {
@@ -21,12 +22,12 @@ sub parse {
   #metadata
   my($oai_marc) = $xpath->find("/$op/record[1]/metadata/oai_marc")->get_nodelist();
 
-  push @metadata,Catmandu::AlephX::Metadata::MARC::Aleph->parse($oai_marc) if $oai_marc;
+  my $metadata = Catmandu::AlephX::Metadata::MARC::Aleph->parse($oai_marc) if $oai_marc;
 
   my @errors = map { $_->to_literal; } $xpath->find("/$op/error")->get_nodelist();
 
   __PACKAGE__->new(
-    record => Catmandu::AlephX::Record->new(metadata => \@metadata),
+    record => Catmandu::AlephX::Record->new(metadata => $metadata),
     session_id => $xpath->findvalue("/$op/session-id"),
     errors => \@errors,
     content_ref => $str_ref

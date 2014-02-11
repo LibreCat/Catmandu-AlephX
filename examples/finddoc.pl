@@ -11,7 +11,7 @@ my $aleph = Catmandu::AlephX->new(url => "http://aleph.ugent.be/X");
 my $find = $aleph->find_doc(base=>'rug01',doc_num=>'000000444');
 
 if($find->is_success){
-  say Dumper($find->record);
+  say Dumper($find->record->metadata->data);
 }else{
   say STDERR join('',@{$find->errors});
 }

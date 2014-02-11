@@ -12,6 +12,7 @@ sub parse {
 
   my $leader = $xpath->findvalue("./*[local-name() = 'leader']");
   my $fmt = "";
+  my $_id;
 
   for my $controlfield($xpath->find("./*[local-name() = 'controlfield']")->get_nodelist()){
     my $tag = $controlfield->findvalue('@tag');
@@ -19,6 +20,9 @@ sub parse {
     if($tag eq "FMT"){
       $fmt = $value;
       next;
+    }
+    if($tag eq "001"){
+      $_id = $value;
     }
     #leader can also be specified in a controlfield??
     elsif($tag eq "LDR"){
@@ -48,7 +52,7 @@ sub parse {
 
   }
 
-  __PACKAGE__->new(type => 'oai_marc',data => \@marc); 
+  __PACKAGE__->new(type => 'oai_marc',data => { record => \@marc, _id => $_id }); 
 }
 
 1;

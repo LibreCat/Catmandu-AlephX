@@ -23,18 +23,16 @@ sub parse {
   
   for my $r($xpath->find("/$op/record")->get_nodelist()){
   
-    my @metadata;
-
     my($l) = $r->find('./record_header')->get_nodelist();
 
     my $record_header = $l ? get_children($l,1) : {};
 
-    push @metadata,Catmandu::AlephX::Metadata::MARC::Aleph->parse(
+    my $metadata = Catmandu::AlephX::Metadata::MARC::Aleph->parse(
       $r->find('./metadata/oai_marc')->get_nodelist()
     );
     
     push @records,Catmandu::AlephX::Record::Present->new(
-      metadata => \@metadata,
+      metadata => $metadata,
       record_header => $record_header,
       doc_number => $r->findvalue('./doc_number')
     );   

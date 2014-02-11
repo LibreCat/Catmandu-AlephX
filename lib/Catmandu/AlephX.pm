@@ -250,9 +250,7 @@ sub find {
 
   my $find = $aleph->find_doc(base=>'rug01',doc_num=>'000000444',format=>'marc');
   if($find->is_success){
-    for my $record(@{ $find->records }){
-      say Dumper($record);
-    }
+    say Dumper($find->record);
   }else{
     say STDERR join("\n",@{$find->errors});
   }
@@ -285,9 +283,9 @@ sub find_doc {
     set_entry => "000000001-000000003"
   );
   if($present->is_success){
-    say "doc_number: ".$record->{doc_number};
-    for my $metadata(@{ $record->metadata }){
-      say "\tmetadata: ".$metadata->type;
+    for my $record(@{ $present->records() }){
+      say "doc_number: ".$record->doc_number;
+      say "\tmetadata: ".$record->metadata->type;
     }
   }else{
     say STDERR join("\n",@{$present->errors});
@@ -650,7 +648,7 @@ sub user_auth {
     1. retrieve record by 'find_doc'
     2. get marc record: 
 
-        my $marc = $res->record->metadata->[0]->data
+        my $marc = $res->record->metadata->data
 
     3. filter out your CAT fields ($a == "WWW-X") to shorten the XML:
         
@@ -672,7 +670,7 @@ sub user_auth {
     doc_num => $doc_number,
     base => "usm01"
   );
-  my $marc = $find_doc->record->metadata->[0]->data;
+  my $marc = $find_doc->record->metadata->data;
   my $content_ref = $find_doc->content_ref;
 
   my %args = (
@@ -705,14 +703,11 @@ sub update_doc {
     my $m = Catmandu::AlephX::Metadata::MARC::Aleph->to_xml($args{marc});
     my $xml = <<EOF;
 <?xml version = "1.0" encoding = "UTF-8"?>
-<find-doc>
-  <record>
-    <metadata>
-    $m
-    </metadata>
-  </record>
-</find-doc>
+<find-doc><record><metadata>$m</metadata></record></find-doc>
 EOF
+    if(length($xml) > 20000){
+      confess "xml_full_req cannot be longer than 20000 characters";
+    }
     $args{xml_full_req} = $xml;
   }
 

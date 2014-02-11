@@ -10,9 +10,9 @@ Catmandu::Importer::AlephX->new(
   url => 'http://aleph.ugent.be/X',
   query => 'WRD=(art)',
   base => 'usm01',
-  include_items => 1
+  include_items => 0,
+  limit => 50
 )->each(sub{
   my $record = shift;
-  print Dumper($record->{record});
-  print Dumper($record->{items});
+  print Dumper($record);
 });

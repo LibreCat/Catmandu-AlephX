@@ -10,7 +10,7 @@ with('Catmandu::AlephX::Response');
 #<doc> has extra tag in marc array called 'AVA'
 has record => (
   is => 'ro',
-  isa => sub { array_ref($_[0]); }
+  isa => sub { hash_ref($_[0]); }
 );
 sub op { 'ill-get-doc' }
 

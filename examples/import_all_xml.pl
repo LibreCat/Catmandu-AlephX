@@ -3,16 +3,19 @@ use FindBin;
 use lib "$FindBin::Bin/../lib";
 use Catmandu::Sane;
 use Catmandu::Importer::AlephX;
-use Catmandu::AlephX::Metadata::MARC::Aleph;
 use Data::Dumper;
+use Catmandu::Exporter::MARC;
 use open qw(:std :utf8);
+
+
+my $exporter = Catmandu::Exporter::MARC->new(type => "XML");
 
 Catmandu::Importer::AlephX->new(
   url => 'http://aleph.ugent.be/X',
-  query => 'WRD=(art)',
   base => 'usm01',
   include_items => 0
 )->each(sub{
   my $record = shift;
-  say Catmandu::AlephX::Metadata::MARC::Aleph->to_xml($record);
+  $exporter->add($record);
 });
+$exporter->commit();

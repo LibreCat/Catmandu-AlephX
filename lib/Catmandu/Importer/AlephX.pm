@@ -1,6 +1,6 @@
 package Catmandu::Importer::AlephX;
-
 use Catmandu::Sane;
+use Catmandu::Util qw(:check :is);
 use Moo;
 use Catmandu::AlephX;
 use Data::Dumper;
@@ -11,8 +11,14 @@ our $VERSION = '0.02';
 
 has url     => (is => 'ro', required => 1);
 has base    => (is => 'ro', required => 1);
-has query   => (is => 'ro', required => 1);
+has query   => (is => 'ro' );
 has include_items => (is => 'ro',required => 0,lazy => 1,default => sub { 1; });
+has limit => (
+  is => 'ro',
+  isa => sub { check_natural($_[0]); },
+  lazy => 1,
+  default => sub { 20; }
+);
 has aleph   => (is => 'ro', init_arg => undef , lazy => 1 , builder => '_build_aleph');
 
 sub _build_aleph {
@@ -29,29 +35,88 @@ sub _fetch_items {
 }
 
 sub generator {
-  my ($self) = @_;
-  my $find    = $self->aleph->find(request => $self->query , base => $self->base);
-  
-  return sub {undef} unless $find->is_success;    
-  
-  sub {
-    state $set_number = $find->set_number;
-    state $no_records = int($find->no_records);
-    state $count = 0;
+  my $self = $_[0];
 
-    return if ($no_records == 0 || $count >= $no_records );
-    my $present = $self->aleph->present(set_number => $set_number , set_entry => sprintf("%-9.9d",++$count));
-    return unless $present->is_success;
-    return unless @{$present->records} == 1;
- 
-    my $doc   = $present->records->[0];
-    my $items = [];
-    if($self->include_items){
-      $items = $self->_fetch_items($doc->{doc_number});
-    }
+  #generator, based on a query (limited)
+  if(is_string($self->query)){
+
+    return sub {
+      my $find = $self->aleph->find(request => $self->query , base => $self->base);
+
+      return unless $find->is_success;
+
+      state $buffer = [];
+      state $set_number = $find->set_number;
+      state $no_records = int($find->no_records);
+      state $no_entries = int($find->no_entries);
+
+      #warning: no_records is the number of records found, but only no_entries are stored in the set.
+      #         a call to 'present' with set_number higher than no_entries has no use.
+     
+      state $offset = 1;
+      state $limit = $self->limit;
+
+      return if $no_entries == 0 || $offset > $no_entries;
+
+      unless(@$buffer){
+
+        my $set_entry;
+        {
+          my $start = sprintf("%-9.9d",$offset);
+          my $l = $offset + $limit - 1;
+          my $end = sprintf("%-9.9d",($l > $no_entries ? $no_entries : $l));
+          $set_entry = "$start-$end";        
+        }
+        
+        my $present = $self->aleph->present(set_number => $set_number , set_entry => $set_entry);
+        return unless $present->is_success;
+
+        for my $record(@{ $present->records() }){
+
+          my $items = [];
+          if($self->include_items){
+            $items = $self->_fetch_items($record->{doc_number});
+          }
+          #do NOT use $record->metadata->data->{_id}, for that uses the field '001' that can be empty
+          push @$buffer,{ record => $record->metadata->data->{record} , items => $items, _id => $record->{doc_number} };
+
+        }
+
+        $offset += $limit;
+
+      }
+
+      shift(@$buffer);
+    };
+
+  }
+  #generator that tries to fetch all records
+  else{
+
+    return sub {
+
+      state $count = 1;
+      state $aleph = $self->aleph;
     
-    { record => $doc->metadata->[0]->data , items => $items };
-  };
+      my $doc_num = sprintf("%-9.9d",$count++);     
+      my $find_doc = $aleph->find_doc(base => $self->base,doc_num => $doc_num);
+      
+      return unless $find_doc->is_success;
+
+      my $items = [];
+      if($self->include_items){
+        $items = $self->_fetch_items($doc_num);
+      }
+
+      return {
+        record => $find_doc->record->metadata->data->{record},
+        items => $items,
+        #do NOT use $record->metadata->data->{_id}, for that uses the field '001' that can be empty
+        _id => $doc_num
+      };
+      
+    };
+  }
 }
 
 =head1 NAME

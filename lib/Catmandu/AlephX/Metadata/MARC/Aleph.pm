@@ -9,11 +9,16 @@ sub parse {
   my($class,$xpath)=@_;
  
   my @marc = ();
+  my $_id;
 
   for my $fix_field($xpath->find('./fixfield')->get_nodelist()){
     my $tag = $fix_field->findvalue('@id');
     my $value = $fix_field->findvalue('.');
     push @marc,[$tag,'','','_',$value];
+
+    if($tag eq "001"){
+      $_id = $value;
+    }
   }
 
   for my $var_field($xpath->find('./varfield')->get_nodelist()){
@@ -34,7 +39,7 @@ sub parse {
 
   }
 
-  __PACKAGE__->new(type => 'oai_marc',data => \@marc); 
+  __PACKAGE__->new(type => 'oai_marc',data => { record => \@marc, _id => $_id }); 
 }
 sub escape_value {
   my $data = $_[0];
@@ -45,11 +50,11 @@ sub escape_value {
   $data;
 }
 sub to_xml {
-  my($class,$array)=@_;
+  my($class,$record)=@_;
 
   my @xml = "<oai_marc>";
 
-  for my $field(@$array){
+  for my $field(@{ $record->{record} }){
     my($tag,$ind1,$ind2,@subfields)= @$field;
 
     if(array_includes([qw(FMT LDR)],$tag) || $tag =~ /^00/o){

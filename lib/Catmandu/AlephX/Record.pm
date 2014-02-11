@@ -8,11 +8,7 @@ has metadata => (
   is => 'ro',
   required => 1,
   isa => sub {
-    my $metadata = shift;
-    array_ref($metadata);
-    for(@$metadata){
-      instance($_,"Catmandu::AlephX::Metadata");
-    }
+    instance($_[0],"Catmandu::AlephX::Metadata");
   }
 );
 

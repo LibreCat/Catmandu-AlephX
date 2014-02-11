@@ -12,8 +12,7 @@ use open qw(:std :utf8);
 my $aleph = Catmandu::AlephX->new(url => "http://aleph.ugent.be/X");
 
 my $importer = Catmandu::Importer::AlephX->new(
-  url => 'http://aleph.ugent.be/X',
-  query => 'WRD=(art)',
+  url => 'http://aleph.ugent.be/X',  
   base => 'usm01' 
 );
 
@@ -24,10 +23,11 @@ print Dumper($marc);
 my %args = (
   'library' => 'usm01',
   'doc_action' => 'UPDATE',
-  'doc_number' => $marc->{_id},
+  'doc_number' => '000000000',
   marc => $marc
 );
 my $info = $aleph->update_doc(%args);
+say ${ $info->content_ref };
 if($info->is_success){
   say "all ok";
 }else{

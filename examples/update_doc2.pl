@@ -21,10 +21,10 @@ sub get_doc {
 }
 
 my $find_doc = get_doc();
-my $marc = $find_doc->record->metadata->[0]->data;
+my $marc = $find_doc->record->metadata->data;
 
 #warning: this removes all CAT fields in aleph!
-$marc = [grep { !( $_->[0] eq "CAT" && $_->[4] eq "WWW-X" ) } @$marc];
+$marc->{record} = [grep { !( $_->[0] eq "CAT" && $_->[4] eq "WWW-X" ) } @{ $marc->{record} }];
 
 my %args = (
   'library' => 'usm01',
@@ -39,13 +39,13 @@ if($u->is_success){
   say STDERR join("\n",@{$u->errors});
 }
 
-my $new_marc = get_doc()->record->metadata->[0]->data;
+my $new_marc = get_doc()->record->metadata->data;
 
 
 #every updates creates 'CAT' fields, so first remove these, and also 005 (last modified)
 
-$marc = [grep { $_->[0] ne "CAT" && $_->[0] ne "005" } @$marc];
-$new_marc = [grep { $_->[0] ne "CAT" && $_->[0] ne "005" } @$new_marc];
+$marc->{record} = [grep { $_->[0] ne "CAT" && $_->[0] ne "005" } @{ $marc->{record} }];
+$new_marc->{record} = [grep { $_->[0] ne "CAT" && $_->[0] ne "005" } @{ $new_marc->{record} }];
 
 say "old marc:";
 say Dumper($marc);
