@@ -17,9 +17,14 @@ has _web => (
   is => 'ro',
   lazy => 1,
   default => sub {
-    LWP::UserAgent->new(
+    my $ua = LWP::UserAgent->new(
       cookie_jar => {}
     );
+    if(is_string($ENV{LWP_TRACE})){
+      $ua->add_handler("request_send",  sub { shift->dump; return });
+      $ua->add_handler("response_done", sub { shift->dump; return });
+    }
+    $ua;
   }
 );
 sub _validate_web_response {
@@ -28,6 +33,7 @@ sub _validate_web_response {
 }
 sub _do_web_request {
   my($self,$params,$method)=@_;
+
   $method ||= "GET";
   my $res;
   if(uc($method) eq "GET"){
@@ -38,6 +44,7 @@ sub _do_web_request {
     confess "method $method not supported";
   }
   _validate_web_response($res);
+
   $res;
 }
 sub _post {
@@ -137,7 +144,7 @@ sub item_data {
   require Catmandu::AlephX::Op::ItemData;
   $args{'op'} = Catmandu::AlephX::Op::ItemData->op();
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::ItemData->parse($res->content_ref());    
+  Catmandu::AlephX::Op::ItemData->parse($res->content_ref(),\%args);    
 }
 =head2 item-data-multi
  
@@ -173,7 +180,7 @@ sub item_data_multi {
   require Catmandu::AlephX::Op::ItemDataMulti;
   $args{'op'} = Catmandu::AlephX::Op::ItemDataMulti->op();
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::ItemDataMulti->parse($res->content_ref());    
+  Catmandu::AlephX::Op::ItemDataMulti->parse($res->content_ref(),\%args);    
 }
 =head2 read_item
 
@@ -203,7 +210,7 @@ sub read_item {
   require Catmandu::AlephX::Op::ReadItem;
   $args{'op'} = Catmandu::AlephX::Op::ReadItem->op();
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::ReadItem->parse($res->content_ref());    
+  Catmandu::AlephX::Op::ReadItem->parse($res->content_ref(),\%args);    
 }
 
 =head2 find
@@ -237,7 +244,7 @@ sub find {
   require Catmandu::AlephX::Op::Find;
   $args{'op'} = Catmandu::AlephX::Op::Find->op();
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::Find->parse($res->content_ref());    
+  Catmandu::AlephX::Op::Find->parse($res->content_ref(),\%args);    
 }
 
 =head2 find_doc
@@ -265,7 +272,7 @@ sub find_doc {
   require Catmandu::AlephX::Op::FindDoc;
   $args{'op'} = Catmandu::AlephX::Op::FindDoc->op();
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::FindDoc->parse($res->content_ref());    
+  Catmandu::AlephX::Op::FindDoc->parse($res->content_ref(),\%args);    
 }
 
 =head2 present
@@ -301,7 +308,7 @@ sub present {
   require Catmandu::AlephX::Op::Present;
   $args{'op'} = Catmandu::AlephX::Op::Present->op();
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::Present->parse($res->content_ref());    
+  Catmandu::AlephX::Op::Present->parse($res->content_ref(),\%args);    
 }
 
 =head2 ill_get_doc_short
@@ -331,7 +338,7 @@ sub ill_get_doc_short {
   require Catmandu::AlephX::Op::IllGetDocShort;
   $args{'op'} = Catmandu::AlephX::Op::IllGetDocShort->op();
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::IllGetDocShort->parse($res->content_ref());    
+  Catmandu::AlephX::Op::IllGetDocShort->parse($res->content_ref(),\%args);    
 }
 =head2 bor_auth
 
@@ -370,7 +377,7 @@ sub bor_auth {
   require Catmandu::AlephX::Op::BorAuth;
   $args{'op'} = Catmandu::AlephX::Op::BorAuth->op();
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::BorAuth->parse($res->content_ref());
+  Catmandu::AlephX::Op::BorAuth->parse($res->content_ref(),\%args);
 } 
 =head2 bor_info
 
@@ -421,7 +428,7 @@ sub bor_info {
   require Catmandu::AlephX::Op::BorInfo;
   $args{'op'} = Catmandu::AlephX::Op::BorInfo->op();
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::BorInfo->parse($res->content_ref());
+  Catmandu::AlephX::Op::BorInfo->parse($res->content_ref(),\%args);
 }
 
 =head2 ill_bor_info
@@ -438,7 +445,7 @@ sub ill_bor_info {
   require Catmandu::AlephX::Op::IllBorInfo;
   $args{'op'} = Catmandu::AlephX::Op::IllBorInfo->op();
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::IllBorInfo->parse($res->content_ref());
+  Catmandu::AlephX::Op::IllBorInfo->parse($res->content_ref(),\%args);
 }
 
 sub ill_loan_info {
@@ -446,7 +453,7 @@ sub ill_loan_info {
   require Catmandu::AlephX::Op::IllLoanInfo;
   $args{'op'} = Catmandu::AlephX::Op::IllLoanInfo->op();
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::IllLoanInfo->parse($res->content_ref());
+  Catmandu::AlephX::Op::IllLoanInfo->parse($res->content_ref(),\%args);
 }
 =head2 circ_status
 
@@ -466,7 +473,7 @@ sub circ_status {
   require Catmandu::AlephX::Op::CircStatus;
   $args{'op'} = Catmandu::AlephX::Op::CircStatus->op();
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::CircStatus->parse($res->content_ref());
+  Catmandu::AlephX::Op::CircStatus->parse($res->content_ref(),\%args);
 }
 =head2 circ_stat_m
 
@@ -488,7 +495,7 @@ sub circ_stat_m {
   require Catmandu::AlephX::Op::CircStatM;
   $args{'op'} = Catmandu::AlephX::Op::CircStatM->op();
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::CircStatM->parse($res->content_ref());
+  Catmandu::AlephX::Op::CircStatM->parse($res->content_ref(),\%args);
 }
 =head2 publish_avail
 
@@ -532,7 +539,7 @@ sub publish_avail {
   require Catmandu::AlephX::Op::PublishAvail;
   $args{'op'} = Catmandu::AlephX::Op::PublishAvail->op();
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::PublishAvail->parse($res->content_ref());
+  Catmandu::AlephX::Op::PublishAvail->parse($res->content_ref(),\%args);
 }
 =head2 ill_get_doc
 
@@ -562,7 +569,7 @@ sub ill_get_doc {
   require Catmandu::AlephX::Op::IllGetDoc;
   $args{'op'} = Catmandu::AlephX::Op::IllGetDoc->op();
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::IllGetDoc->parse($res->content_ref());
+  Catmandu::AlephX::Op::IllGetDoc->parse($res->content_ref(),\%args);
 }
 =head2 renew
 
@@ -579,7 +586,7 @@ sub renew {
   require Catmandu::AlephX::Op::Renew;
   $args{'op'} = Catmandu::AlephX::Op::Renew->op();
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::Renew->parse($res->content_ref());
+  Catmandu::AlephX::Op::Renew->parse($res->content_ref(),\%args);
 }
 =head2 hold_req
 
@@ -595,21 +602,21 @@ sub hold_req {
   require Catmandu::AlephX::Op::HoldReq;
   $args{'op'} = Catmandu::AlephX::Op::HoldReq->op();
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::HoldReq->parse($res->content_ref());
+  Catmandu::AlephX::Op::HoldReq->parse($res->content_ref(),\%args);
 }
 sub hold_req_cancel {
   my($self,%args)=@_;
   require Catmandu::AlephX::Op::HoldReqCancel;
   $args{'op'} = Catmandu::AlephX::Op::HoldReqCancel->op();
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::HoldReqCancel->parse($res->content_ref());
+  Catmandu::AlephX::Op::HoldReqCancel->parse($res->content_ref(),\%args);
 }
 sub user_auth {
   my($self,%args)=@_;
   require Catmandu::AlephX::Op::UserAuth;
   $args{op} = Catmandu::AlephX::Op::UserAuth->op();
   my $res = $self->_do_web_request(\%args);
-  Catmandu::AlephX::Op::UserAuth->parse($res->content_ref());
+  Catmandu::AlephX::Op::UserAuth->parse($res->content_ref(),\%args);
 }
 =head2 update_doc
 
@@ -712,7 +719,7 @@ EOF
   }
 
   my $res = $self->_do_web_request(\%args,"POST");
-  Catmandu::AlephX::Op::UpdateDoc->parse($res->content_ref());
+  Catmandu::AlephX::Op::UpdateDoc->parse($res->content_ref(),\%args);
 }
 =head2 update_item
 
@@ -763,7 +770,7 @@ sub update_item {
   require Catmandu::AlephX::Op::UpdateItem;
   $args{op} = Catmandu::AlephX::Op::UpdateItem->op();
   my $res = $self->_do_web_request(\%args,"POST");
-  Catmandu::AlephX::Op::UpdateItem->parse($res->content_ref());
+  Catmandu::AlephX::Op::UpdateItem->parse($res->content_ref(),\%args);
 }
 
 =head1 AUTHOR

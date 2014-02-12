@@ -13,21 +13,25 @@ has record => (
 sub op { 'find-doc' }
 
 sub parse {
-  my($class,$str_ref) = @_;
+  my($class,$str_ref,$args) = @_;
+  my $doc_num = $args->{doc_num} || $args->{doc_number};
+
   my $xpath = xpath($str_ref);
   my $op = op();
 
   my @metadata = ();
 
-  #metadata
-  my($oai_marc) = $xpath->find("/$op/record[1]/metadata/oai_marc")->get_nodelist();
-
-  my $metadata = Catmandu::AlephX::Metadata::MARC::Aleph->parse($oai_marc) if $oai_marc;
-
   my @errors = map { $_->to_literal; } $xpath->find("/$op/error")->get_nodelist();
 
   __PACKAGE__->new(
-    record => Catmandu::AlephX::Record->new(metadata => $metadata),
+    record => Catmandu::AlephX::Record->new(metadata => sub {
+      my($oai_marc) = $xpath->find("/$op/record[1]/metadata/oai_marc")->get_nodelist();
+      if($oai_marc){
+        my $m = Catmandu::AlephX::Metadata::MARC::Aleph->parse($oai_marc);
+        $m->data->{_id} = $doc_num;
+        $m;
+      }
+    }),
     session_id => $xpath->findvalue("/$op/session-id"),
     errors => \@errors,
     content_ref => $str_ref

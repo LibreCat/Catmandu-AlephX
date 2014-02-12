@@ -19,16 +19,15 @@ has limit => (
   lazy => 1,
   default => sub { 20; }
 );
-has aleph   => (is => 'ro', init_arg => undef , lazy => 1 , builder => '_build_aleph');
+has alephx   => (is => 'ro', init_arg => undef , lazy => 1 , builder => '_build_alephx');
 
-sub _build_aleph {
-  my ($self) = @_;
-  Catmandu::AlephX->new(url => $self->url);
+sub _build_alephx {
+  Catmandu::AlephX->new(url => $_[0]->url);
 }
 
 sub _fetch_items {
   my ($self, $doc_number) = @_;
-  my $item_data = $self->aleph->item_data(base => $self->base, doc_number => $doc_number);
+  my $item_data = $self->alephx->item_data(base => $self->base, doc_number => $doc_number);
   
   return [] unless $item_data->is_success;
   return $item_data->items;
@@ -41,7 +40,7 @@ sub generator {
   if(is_string($self->query)){
 
     return sub {
-      my $find = $self->aleph->find(request => $self->query , base => $self->base);
+      my $find = $self->alephx->find(request => $self->query , base => $self->base);
 
       return unless $find->is_success;
 
@@ -68,7 +67,7 @@ sub generator {
           $set_entry = "$start-$end";        
         }
         
-        my $present = $self->aleph->present(set_number => $set_number , set_entry => $set_entry);
+        my $present = $self->alephx->present(set_number => $set_number , set_entry => $set_entry);
         return unless $present->is_success;
 
         for my $record(@{ $present->records() }){
@@ -96,10 +95,10 @@ sub generator {
     return sub {
 
       state $count = 1;
-      state $aleph = $self->aleph;
+      state $alephx = $self->alephx;
     
       my $doc_num = sprintf("%-9.9d",$count++);     
-      my $find_doc = $aleph->find_doc(base => $self->base,doc_num => $doc_num);
+      my $find_doc = $alephx->find_doc(base => $self->base,doc_num => $doc_num);
       
       return unless $find_doc->is_success;
 

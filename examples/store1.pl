@@ -14,6 +14,13 @@ my $bag = Catmandu::Store::AlephX->new(url => "http://aleph.ugent.be/X")->bag();
 #print Dumper($hits);
 
 my $record = $bag->get('000000444');
-$record->{_id} = "010000000";
 
-$bag->add($record);
+#$record->{record} = [grep {
+#  $_->[0] ne "001";
+#} @{ $record->{record} }];
+#say Dumper($record);
+#$record->{_id} = "010000000";
+
+delete $record->{_id};
+
+print Dumper($bag->add($record));

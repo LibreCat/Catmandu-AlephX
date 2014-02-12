@@ -3,7 +3,6 @@ use namespace::clean;
 use Catmandu::Sane;
 use Catmandu::AlephX;
 use Moo;
-use Data::Dumper;
 
 our $VERSION = "0.01";
 
@@ -31,15 +30,25 @@ use Moo;
 use Catmandu::Util qw(:check :is);
 use Catmandu::Hits;
 use Clone qw(clone);
-use Data::Dumper;
+use Carp qw(confess);
 
 with 'Catmandu::Bag';
 with 'Catmandu::Searchable';
 
+#override automatic id generation from Catmandu::Bag
+before add => sub { 
+  check_catmandu_marc($_[1]);    
+  $_[1] = clone($_[1]);  
+  if(is_string($_[1]->{_id})){
+    $_[1]->{_id} =~ /^\d{9}$/o or confess("invalid _id ".$_[1]->{_id});   
+  }else{
+    $_[1]->{_id} = sprintf("%-9.9d",0);
+  }
+};
+
 sub check_catmandu_marc {
   my $r = $_[0];
-  check_hash_ref($r);
-  check_string($r->{_id});
+  check_hash_ref($r);  
   check_array_ref($r->{record});
   check_array_ref($_) for @{ $r->{record} };
 }
@@ -55,56 +64,141 @@ sub get {
   );
   
   return unless($find_doc->is_success);
+
   $find_doc->record->metadata->data;
 }
+=head2 add($catmandu_marc)
+
+=head3 example
+
+  #add new record. WARNING: Aleph will ignore the 001 field, 
+  my $new_record = $bag->add({
+    record =>  [
+      [
+        'FMT',
+        '',
+        '',
+        '_',
+        'SE'
+      ],
+      [
+        'LDR',
+        '',
+        '',
+        '_',
+        '00000cas^^2200385^a^4500'
+      ],
+      [
+        '001',
+        '',
+        '',
+        '_',
+        '000000444'
+      ],
+      [
+        '005',
+        '',
+        '',
+        '_',
+        '20140212095615.0'
+      ] 
+      ..
+    ]    
+  });
+  say "new record:".$record->{_id};
+
+=cut
 sub add {
   my($self,$data)=@_;
-  
-  $data = clone($data);
+
   my $alephx = $self->store->alephx;
 
-  #try to update (even when it does not exists)
+  #insert/update
   my $update_doc = $alephx->update_doc(
+    library => $self->name,
     doc_action => 'UPDATE',
     doc_number => $data->{_id},
     marc => $data
   );
-  say ${ $update_doc->content_ref() };
-  #document does not exist (yet)
-  if(!($update_doc->is_success) && $update_doc->errors()->[-1] =~ /Doc number given does not exist/i){
-
-    say "not found, trying to insert record";
-    #'If you want to insert a new document, then the doc_number you supply should be all zeroes'
-    my $new_doc_num = sprintf("%-9.9d",0);
-    #last error should be 'Document: 000050105 was updated successfully.'
-    $update_doc = $alephx->update_doc(
-      doc_action => 'UPDATE',
-      doc_number => $data->{_id},
-      marc => $data
-    );
-    if($update_doc->errors()->[-1] =~ /Document: (\d{9}) was updated successfully/i){
-      my $_id = $1;
-      say "new record inserted with doc_num $_id";
-      $data->{_id} = $_id;      
-    }
-  }else{
-    say "found and updated";
-  }
-
   
-  $data;
+  #_id not given: new record explicitely requested 
+  if(int($data->{_id}) == 0){
+    if($update_doc->errors()->[-1] =~ /Document: (\d{9}) was updated successfully/i){
+      $data->{_id} = $1;    
+    }else{
+      confess($update_doc->errors()->[-1]);
+    }
+  }
+  #_id given: update when exists, insert when not
+  else{
+
+    #document does not exist (yet)
+    if(!($update_doc->is_success) && $update_doc->errors()->[-1] =~ /Doc number given does not exist/i){
+    
+      #'If you want to insert a new document, then the doc_number you supply should be all zeroes'
+      my $new_doc_num = sprintf("%-9.9d",0);
+      #last error should be 'Document: 000050105 was updated successfully.'
+      $update_doc = $alephx->update_doc(
+        library => $self->name,
+        doc_action => 'UPDATE',
+        doc_number => $data->{_id},
+        marc => $data
+      );
+     
+      if($update_doc->errors()->[-1] =~ /Document: (\d{9}) was updated successfully/i){
+        $data->{_id} = $1;              
+      }
+    }else{
+      #say "found and updated";
+    }
+
+  }
+  
 }
 
 sub delete {
   my($self,$id)= @_;
-  die("not implemented");
-
+  
+  my $xml_full_req = <<EOF;
+<?xml version="1.0" encoding="UTF-8" ?>
+<find-doc><record><metadata><oai_marc><fixfield id="001">$id</fixfield></oai_marc></metadata></record></find-doc>
+EOF
+  
+  #insert/update
+  my $update_doc = $self->store->alephx->update_doc(
+    library => $self->name,
+    doc_action => 'DELETE',
+    doc_number => $id,
+    xml_full_req => $xml_full_req
+  );
+ 
+  #last error: 'Document: 000050124 was updated successfully.'
+  (scalar(@{ $update_doc->errors() })) && ($update_doc->errors()->[-1] =~ /Document: $id was updated successfully./);  
 }
 sub generator {
-  my($self)=@_;
-  die("not implemented");
+  my $self = $_[0];
+
+  #TODO: skip deleted records? (DEL$$a == 'Y')
+  #      <varfield id="DEL" i1=" " i2=" "><subfield label="a">Y</subfield></varfield>
+  #TODO: in some cases, deleted records are really removed from the database
+  #      in these cases, it does not make sense to interpret a failing 'find-doc' as the end of the database.
+  #      to compete with these 'holes', the size of the hole need to be defined (how big before thinking this is the end)
 
   sub {
+    state $count = 1;
+    state $base = $self->name;
+    state $alephx = $self->store->alephx;
+
+    my $doc_num = sprintf("%-9.9d",$count++);
+    my $find_doc = $alephx->find_doc(base => $base,doc_num => $doc_num);
+
+    return unless $find_doc->is_success;
+
+    return {
+      record => $find_doc->record->metadata->data->{record},
+      _id => $doc_num
+    };
+    
   };
 }
 #warning: no_entries is the maximum number of entries to be retrieved (always lower or equal to no_records)
@@ -150,16 +244,15 @@ sub search {
   }); 
 }
 sub searcher {
-
+  die("not implemented");
 }
 
-#not supported
+#not supported for security reasons
 sub delete_all {
-  my($self)=@_;
   die("not supported");
 }
 sub delete_by_query {
-
+  die("not supported");
 }
 sub translate_sru_sortkeys {
   die("not supported");

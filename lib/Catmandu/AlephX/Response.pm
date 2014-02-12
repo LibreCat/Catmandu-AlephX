@@ -59,7 +59,7 @@ has errors => (
 #deprecated, use $self->errors
 sub error {
   warn "method 'error' is deprecated, and only return one error. Please use method 'errors' which gives you an array reference of all errors.";
-  $_[0]->errors()->[0];
+  $_[0]->errors()->[-1];
 }
 has session_id => (is => 'rw');
 sub is_success { 
