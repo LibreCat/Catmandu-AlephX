@@ -171,7 +171,7 @@ EOF
     doc_number => $id,
     xml_full_req => $xml_full_req
   );
- 
+
   #last error: 'Document: 000050124 was updated successfully.'
   (scalar(@{ $update_doc->errors() })) && ($update_doc->errors()->[-1] =~ /Document: $id was updated successfully./);  
 }
