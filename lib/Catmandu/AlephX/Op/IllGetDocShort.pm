@@ -1,6 +1,6 @@
 package Catmandu::AlephX::Op::IllGetDocShort;
 use Catmandu::Sane;
-use Data::Util qw(:check :validate);
+use Catmandu::Util qw(:check :is);
 use Moo;
 
 with('Catmandu::AlephX::Response');
@@ -9,7 +9,7 @@ has z13 => (
   is => 'ro',
   lazy => 1,
   isa => sub{
-    hash_ref($_[0]);
+    check_hash_ref($_[0]);
   },
   default => sub { {}; }
 ); 
@@ -27,11 +27,9 @@ sub parse {
 
   $z13 = get_children($z) if $z;
 
-  my @errors = map { $_->to_literal; } $xpath->find("/$op/error")->get_nodelist();
-
   __PACKAGE__->new(
     session_id => $xpath->findvalue("/$op/session-id"),
-    errors => \@errors,
+    errors => $class->parse_errors($xpath),
     z13 => $z13,
     content_ref => $str_ref
   );

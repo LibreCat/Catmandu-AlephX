@@ -4,7 +4,7 @@ use Carp qw(confess);
 use Moo;
 use LWP::UserAgent;
 use URI::Escape;
-use Data::Util qw(:check :validate);
+use Catmandu::Util qw(:check :is);
 
 our $VERSION = "1.06";
 

@@ -1,6 +1,6 @@
 package Catmandu::AlephX::Op::Renew;
 use Catmandu::Sane;
-use Data::Util qw(:check :validate);
+use Catmandu::Util qw(:check);
 use Moo;
 
 with('Catmandu::AlephX::Response');
@@ -24,7 +24,7 @@ sub parse {
 
   __PACKAGE__->new(
     session_id => $xpath->findvalue('/'.$op.'/session-id'),
-    errors => [$xpath->findvalue("/$op/error|/$op/error-text-1|/$op/error-text-2")],    
+    errors => $class->parse_errors($xpath),    
     reply => $xpath->findvalue('/'.$op.'/reply'),
     due_date => $xpath->findvalue('/'.$op.'/due-date'),
     due_hour => $xpath->findvalue('/'.$op.'/due-hour'),

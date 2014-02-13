@@ -1,6 +1,6 @@
 package Catmandu::AlephX::Op::Present;
 use Catmandu::Sane;
-use Data::Util qw(:validate :check);
+use Catmandu::Util qw(:is :check);
 use Moo;
 use Catmandu::AlephX::Metadata::MARC::Aleph;
 use Catmandu::AlephX::Record::Present;
@@ -26,8 +26,6 @@ sub parse {
 
   my $op = op();
   
-  my @errors = map { $_->to_literal; } $xpath->find("/$op/error")->get_nodelist();  
-
   __PACKAGE__->new(
     records => sub{
       my @records;  
@@ -52,7 +50,7 @@ sub parse {
       \@records
     },
     session_id => $xpath->findvalue("/$op/session-id"),
-    errors => \@errors,
+    errors => $class->parse_errors($xpath),
     content_ref => $str_ref
   );
 }

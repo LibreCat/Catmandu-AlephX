@@ -153,6 +153,9 @@ sub add {
     }
 
   }
+
+  #record is ALWAYS changed by Aleph, so fetch it again
+  $self->get($data->{_id});
   
 }
 

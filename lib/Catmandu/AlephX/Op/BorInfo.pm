@@ -1,6 +1,6 @@
 package Catmandu::AlephX::Op::BorInfo;
 use Catmandu::Sane;
-use Data::Util qw(:check :validate);
+use Catmandu::Util qw(:check :is);
 use Moo;
 
 extends('Catmandu::AlephX::Op::BorAuth');
@@ -9,7 +9,7 @@ with('Catmandu::AlephX::Response');
 has item_l => (
   is => 'ro', 
   lazy => 1,
-  isa => sub { array_ref($_[0]); },
+  isa => sub { check_array_ref($_[0]); },
   default => sub {
     []
   }
@@ -17,7 +17,7 @@ has item_l => (
 has item_h => (
   is => 'ro', 
   lazy => 1,
-  isa => sub { array_ref($_[0]); },  
+  isa => sub { check_array_ref($_[0]); },  
   default => sub {
     []
   }
@@ -33,7 +33,7 @@ has fine => (
   is => 'ro',
   lazy => 1,
   isa => sub {
-    array_ref($_[0]);
+    check_array_ref($_[0]);
   },
   default => sub {
     []
@@ -93,14 +93,12 @@ sub parse {
     }
   }
 
-  my @errors = map { $_->to_literal; } $xpath->find("/$op/error")->get_nodelist();
-
   __PACKAGE__->new(
     %$args,
     balance => $xpath->findvalue("/$op/balance"),
     sign => $xpath->findvalue("/$op/sign"),
     session_id => $xpath->findvalue("/$op/session-id"),
-    errors => \@errors,
+    errors => $class->parse_errors($xpath),
     content_ref => $str_ref
   );
 

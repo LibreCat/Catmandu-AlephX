@@ -21,10 +21,8 @@ sub parse {
   my $xpath = xpath($str_ref);
   my $op = op();
 
-  my @errors = map { $_->to_literal; } $xpath->find("/$op/error")->get_nodelist();
-
   __PACKAGE__->new(
-    errors => \@errors,
+    errors => $class->parse_errors($xpath),
     session_id => $xpath->findvalue("/$op/session-id"),
     set_number => $xpath->findvalue("/$op/set_number"),
     no_records => $xpath->findvalue("/$op/no_records"),

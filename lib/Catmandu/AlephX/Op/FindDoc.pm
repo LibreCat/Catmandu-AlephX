@@ -21,19 +21,17 @@ sub parse {
 
   my @metadata = ();
 
-  my @errors = map { $_->to_literal; } $xpath->find("/$op/error")->get_nodelist();
-
   __PACKAGE__->new(
     record => Catmandu::AlephX::Record->new(metadata => sub {
       my($oai_marc) = $xpath->find("/$op/record[1]/metadata/oai_marc")->get_nodelist();
       if($oai_marc){
         my $m = Catmandu::AlephX::Metadata::MARC::Aleph->parse($oai_marc);
         $m->data->{_id} = $doc_num;
-        $m;
+        return $m;
       }
     }),
     session_id => $xpath->findvalue("/$op/session-id"),
-    errors => \@errors,
+    errors => $class->parse_errors($xpath),
     content_ref => $str_ref
   );
   

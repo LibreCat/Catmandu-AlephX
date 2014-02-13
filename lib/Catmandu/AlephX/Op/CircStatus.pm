@@ -1,13 +1,13 @@
 package Catmandu::AlephX::Op::CircStatus;
 use Catmandu::Sane;
-use Data::Util qw(:check);
+use Catmandu::Util qw(:check);
 use Moo;
 
 with('Catmandu::AlephX::Response');
 
 has item_data => (
   is => 'ro',
-  isa => sub { array_ref($_[0]); }
+  isa => sub { check_array_ref($_[0]); }
 );
 
 sub op { 'circ-status' }
@@ -24,12 +24,10 @@ sub parse {
     push @item_data,get_children($i,1);   
   }
 
-  my @errors = map { $_->to_literal; } $xpath->find("/$op/error")->get_nodelist();
-
   __PACKAGE__->new(
     item_data => \@item_data,
     session_id => $xpath->findvalue("/$op/session-id"),
-    errors => \@errors,
+    errors => $class->parse_errors($xpath),
     content_ref => $str_ref
   );
   

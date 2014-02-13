@@ -1,7 +1,7 @@
 package Catmandu::AlephX::Response;
 use Catmandu::Sane;
 use Moo::Role;
-use Data::Util qw(:validate :check);
+use Catmandu::Util qw(:is :check);
 use Catmandu::AlephX::XPath::Helper qw(:all);
 use Exporter qw(import);
 our @EXPORT_OK=qw(get_children xpath);
@@ -49,10 +49,10 @@ our %EXPORT_TAGS = (all=>[@EXPORT_OK]);
 
 =cut
 
-requires 'op';
+requires qw(op parse);
 has errors => (
   is => 'rw',
-  isa => sub { array_ref($_[0]); },
+  isa => sub { check_array_ref($_[0]); },
   lazy => 1,
   default => sub { []; }
 );
@@ -68,5 +68,10 @@ sub is_success {
 has content_ref => (
   is => 'rw'
 );
+sub parse_errors {
+  my($self,$xpath)=@_;
+  my $op = $self->op();
+  [map { $_->to_literal; } $xpath->find("/$op/error|/login/error|/$op/error-text-1|/$op/error-text-2")->get_nodelist()];
+}
 
 1;

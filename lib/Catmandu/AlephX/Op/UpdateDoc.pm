@@ -1,6 +1,6 @@
 package Catmandu::AlephX::Op::UpdateDoc;
 use Catmandu::Sane;
-use Data::Util qw(:check :validate);
+use Catmandu::Util qw(:check :is);
 use Moo;
 
 with('Catmandu::AlephX::Response');
@@ -12,11 +12,9 @@ sub parse {
   my $xpath = xpath($str_ref);
   my $op = op();
 
-  my @errors = map { $_->to_literal; } $xpath->find("/$op/error")->get_nodelist();
-
   __PACKAGE__->new(
-    session_id => $xpath->findvalue('/'.$op.'/session-id'),
-    errors => \@errors,    
+    session_id => $xpath->findvalue("/$op/session-id"),
+    errors => $class->parse_errors($xpath),    
     content_ref => $str_ref
   );
 } 

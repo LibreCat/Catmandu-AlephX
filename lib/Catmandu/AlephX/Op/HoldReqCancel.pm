@@ -24,12 +24,10 @@ sub parse {
   for(qw(session-id reply)){
     my $key = $_;
     $key =~ s/-/_/go;
-    $args{$key} = $xpath->findvalue("/$op/$key");
+    $args{$key} = $xpath->findvalue("/$op/$_");
   }
 
-  my @errors = map { $_->to_literal; } $xpath->find("/$op/error")->get_nodelist();
-
-  $args{errors} = \@errors;
+  $args{errors} = $class->parse_errors($xpath);
   $args{content_ref} = $str_ref;
 
   __PACKAGE__->new(%args);

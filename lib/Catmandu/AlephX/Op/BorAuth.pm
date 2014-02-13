@@ -1,6 +1,6 @@
 package Catmandu::AlephX::Op::BorAuth;
 use Catmandu::Sane;
-use Data::Util qw(:check :validate);
+use Catmandu::Util qw(:check :is);
 use Moo;
 
 with('Catmandu::AlephX::Response');
@@ -9,7 +9,7 @@ has z303 => (
   is => 'ro',
   lazy => 1,
   isa => sub{
-    hash_ref($_[0]);
+    check_hash_ref($_[0]);
   },
   default => sub {
     {};
@@ -19,7 +19,7 @@ has z304 => (
   is => 'ro',
   lazy => 1,
   isa => sub{
-    hash_ref($_[0]);
+    check_hash_ref($_[0]);
   },
   default => sub {
     {};
@@ -29,7 +29,7 @@ has z305 => (
   is => 'ro',
   lazy => 1,
   isa => sub{
-    hash_ref($_[0]);
+    check_hash_ref($_[0]);
   },
   default => sub {
     {};
@@ -52,12 +52,10 @@ sub parse {
     $args{$key} = $data;    
   }  
 
-  my @errors = map { $_->to_literal; } $xpath->find("/$op/error")->get_nodelist();
-
   __PACKAGE__->new(
     %args,
     session_id => $xpath->findvalue("/$op/session-id"),
-    errors => \@errors,
+    errors => $class->parse_errors($xpath),
     content_ref => $str_ref
   ); 
 

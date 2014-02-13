@@ -1,6 +1,6 @@
 package Catmandu::AlephX::Op::IllLoanInfo;
 use Catmandu::Sane;
-use Data::Util qw(:check :validate);
+use Catmandu::Util qw(:check :is);
 use Moo;
 
 with('Catmandu::AlephX::Response');
@@ -8,9 +8,9 @@ with('Catmandu::AlephX::Response');
 has z36 => (
   is => 'ro', 
   lazy => 1,
-  isa => sub { hash_ref($_[0]); },  
+  isa => sub { check_hash_ref($_[0]); },  
   default => sub {
-    {}
+    +{};
   }
 );
 
@@ -27,11 +27,9 @@ sub parse {
 
   $z36 = get_children($z) if $z;
 
-  my @errors = map { $_->to_literal; } $xpath->find("/ill-LOAN-INFO/error")->get_nodelist();
-
   __PACKAGE__->new(
     session_id => $xpath->findvalue('/ill-LOAN-INFO/session-id'),
-    errors => \@errors,
+    errors => $class->parse_errors($xpath),
     z36 => $z36,
     content_ref => $str_ref
   );

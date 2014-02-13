@@ -1,6 +1,6 @@
 package Catmandu::AlephX::Op::ReadItem;
 use Catmandu::Sane;
-use Data::Util qw(:check :validate);
+use Catmandu::Util qw(:check :is);
 use Moo;
 
 with('Catmandu::AlephX::Response');
@@ -9,7 +9,7 @@ has z30 => (
   is => 'ro',
   lazy => 1,
   isa => sub{
-    hash_ref($_[0]);
+    check_hash_ref($_[0]);
   },
   default => sub {
     {};
@@ -29,11 +29,9 @@ sub parse {
     push @z30,get_children($z,1);
   }    
 
-  my @errors = map { $_->to_literal; } $xpath->find("/$op/error")->get_nodelist();
-
   __PACKAGE__->new(
     session_id => $xpath->findvalue("/$op/session-id"),
-    errors => \@errors,
+    errors => $class->parse_errors($xpath),
     z30 => $z30[0],
     content_ref => $str_ref
   );

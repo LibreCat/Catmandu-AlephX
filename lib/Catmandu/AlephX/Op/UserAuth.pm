@@ -1,6 +1,6 @@
 package Catmandu::AlephX::Op::UserAuth;
 use Catmandu::Sane;
-use Data::Util qw(:check :validate);
+use Catmandu::Util qw(:check :is);
 use Moo;
 
 with('Catmandu::AlephX::Response');
@@ -8,7 +8,7 @@ with('Catmandu::AlephX::Response');
 has z66 => (
   is => 'ro',
   isa => sub{
-    hash_ref($_[0]);
+    check_hash_ref($_[0]);
   }
 ); 
 has reply => (
@@ -24,11 +24,9 @@ sub parse {
   my($z66) = $xpath->find('/z66')->get_nodelist();
   $z66 = get_children($z66,1);
 
-  my @errors = map { $_->to_literal; } $xpath->find("/$op/error")->get_nodelist();
-
   __PACKAGE__->new(
     session_id => $xpath->findvalue('/'.$op.'/session-id'),
-    errors => \@errors,    
+    errors => $class->parse_errors($xpath),    
     reply => $xpath->findvalue('/'.$op.'/reply'),
     z66 => $z66,
     content_ref => $str_ref

@@ -1,6 +1,6 @@
 package Catmandu::AlephX::Op::ItemData;
 use Catmandu::Sane;
-use Data::Util qw(:check :validate);
+use Catmandu::Util qw(:check :is);
 use Moo;
 
 with('Catmandu::AlephX::Response');
@@ -9,9 +9,9 @@ has items => (
   is => 'ro',
   lazy => 1,
   isa => sub{
-    array_ref($_[0]);
+    check_array_ref($_[0]);
     for(@{ $_[0] }){
-      hash_ref($_);
+      check_hash_ref($_);
     }
   },
   default => sub {
@@ -31,11 +31,9 @@ sub parse {
     push @items,get_children($item,1);
   }
 
-  my @errors = map { $_->to_literal; } $xpath->find("/$op/error")->get_nodelist();
-
   __PACKAGE__->new(
     session_id => $xpath->findvalue("/$op/session-id"),
-    errors => \@errors,
+    errors => $class->parse_errors($xpath),
     items => \@items,
     content_ref => $str_ref
   );
