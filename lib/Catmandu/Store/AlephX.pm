@@ -76,7 +76,7 @@ sub get {
     format => 'marc',
     doc_num => $id,
     base => $self->name,
-    $self->default_args()
+    #$self->default_args()
   );
   
   return unless($find_doc->is_success);
@@ -159,7 +159,7 @@ sub add {
       $update_doc = $alephx->update_doc(
         library => $self->name,
         doc_action => 'UPDATE',
-        doc_number => $data->{_id},
+        doc_number => $new_doc_num,
         marc => $data,
         %default_args
       );
