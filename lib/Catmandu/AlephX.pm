@@ -652,6 +652,7 @@ EOF
       confess "xml_full_req cannot be longer than 20000 characters";
     }
     $args{xml_full_req} = $xml;
+    delete $args{marc};
 
   }elsif(is_string($args{doc_action}) && $args{doc_action} eq "DELETE" && !is_string($args{xml_full_req})){
 

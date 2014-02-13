@@ -1,6 +1,7 @@
 package Catmandu::Store::AlephX;
 use namespace::clean;
 use Catmandu::Sane;
+use Catmandu::Sane;
 use Catmandu::AlephX;
 use Moo;
 
@@ -9,6 +10,8 @@ our $VERSION = "0.01";
 with 'Catmandu::Store';
 
 has url => (is => 'ro', required => 1);
+has username => ( is => 'ro' );
+has password => ( is => 'ro' );
 
 has alephx => (
   is       => 'ro',
@@ -23,6 +26,7 @@ around default_bag => sub {
 sub _build_alephx {
   Catmandu::AlephX->new(url => $_[0]->url);
 }
+
 
 package Catmandu::Store::AlephX::Bag;
 use Catmandu::Sane;
@@ -45,6 +49,17 @@ before add => sub {
     $_[1]->{_id} = sprintf("%-9.9d",0);
   }
 };
+sub default_args {
+  my $self = $_[0];
+  state $args = do {
+    my %a;
+    if(is_string($self->store->username) && is_string($self->store->password)){
+      %a = (user_name => $self->store->username,user_password => $self->store->password);
+    }
+    \%a;
+  };
+  %$args;
+}
 
 sub check_catmandu_marc {
   my $r = $_[0];
@@ -60,7 +75,8 @@ sub get {
   my $find_doc = $alephx->find_doc(
     format => 'marc',
     doc_num => $id,
-    base => $self->name
+    base => $self->name,
+    $self->default_args()
   );
   
   return unless($find_doc->is_success);
@@ -112,13 +128,15 @@ sub add {
   my($self,$data)=@_;
 
   my $alephx = $self->store->alephx;
+  my %default_args = $self->default_args();
 
   #insert/update
   my $update_doc = $alephx->update_doc(
     library => $self->name,
     doc_action => 'UPDATE',
     doc_number => $data->{_id},
-    marc => $data
+    marc => $data,
+    %default_args
   );
   
   #_id not given: new record explicitely requested 
@@ -142,7 +160,8 @@ sub add {
         library => $self->name,
         doc_action => 'UPDATE',
         doc_number => $data->{_id},
-        marc => $data
+        marc => $data,
+        %default_args
       );
      
       if($update_doc->errors()->[-1] =~ /Document: (\d{9}) was updated successfully/i){
@@ -172,7 +191,8 @@ EOF
     library => $self->name,
     doc_action => 'DELETE',
     doc_number => $id,
-    xml_full_req => $xml_full_req
+    xml_full_req => $xml_full_req,
+    $self->default_args
   );
 
   #last error: 'Document: 000050124 was updated successfully.'
@@ -193,7 +213,7 @@ sub generator {
     state $alephx = $self->store->alephx;
 
     my $doc_num = sprintf("%-9.9d",$count++);
-    my $find_doc = $alephx->find_doc(base => $base,doc_num => $doc_num);
+    my $find_doc = $alephx->find_doc(base => $base,doc_num => $doc_num,$self->default_args);
 
     return unless $find_doc->is_success;
 
@@ -218,7 +238,8 @@ sub search {
   my $alephx = $self->store->alephx;
   my $find = $alephx->find(
     request => $query,    
-    base => $self->name
+    base => $self->name,
+    $self->default_args
   );
   
   return unless $find->is_success;
