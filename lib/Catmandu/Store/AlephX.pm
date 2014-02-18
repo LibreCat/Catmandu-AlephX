@@ -75,8 +75,7 @@ sub get {
   my $find_doc = $alephx->find_doc(
     format => 'marc',
     doc_num => $id,
-    base => $self->name,
-    #$self->default_args()
+    base => $self->name 
   );
   
   return unless($find_doc->is_success);
@@ -149,30 +148,57 @@ sub add {
   }
   #_id given: update when exists, insert when not
   else{
+ 
+    #error given, can have several reasons: real error or just warnings + success message   
+    unless($update_doc->is_success){
 
-    #document does not exist (yet)
-    if(!($update_doc->is_success) && $update_doc->errors()->[-1] =~ /Doc number given does not exist/i){
-    
-      #'If you want to insert a new document, then the doc_number you supply should be all zeroes'
-      my $new_doc_num = sprintf("%-9.9d",0);
-      #last error should be 'Document: 000050105 was updated successfully.'
-      $update_doc = $alephx->update_doc(
-        library => $self->name,
-        doc_action => 'UPDATE',
-        doc_number => $new_doc_num,
-        marc => $data,
-        %default_args
-      );
-     
-      if($update_doc->errors()->[-1] =~ /Document: (\d{9}) was updated successfully/i){
-        $data->{_id} = $1;              
+      #document does not exist (yet)
+      if($update_doc->errors()->[-1] =~ /Doc number given does not exist/i){
+
+        #'If you want to insert a new document, then the doc_number you supply should be all zeroes'
+        my $new_doc_num = sprintf("%-9.9d",0);
+
+        #last error should be 'Document: 000050105 was updated successfully.'
+        $update_doc = $alephx->update_doc(
+          library => $self->name,
+          doc_action => 'UPDATE',
+          doc_number => $new_doc_num,
+          marc => $data,
+          %default_args
+        );  
+
+        if($update_doc->errors()->[-1] =~ /Document: (\d{9}) was updated successfully/i){
+
+          $data->{_id} = $1;
+
+        }else{
+
+          confess $update_doc->errors()->[-1];
+
+        }
+
       }
-    }else{
-      #say "found and updated";
+      #update ok
+      elsif($update_doc->errors()->[-1] =~ /updated successfully/i){
+
+        #all ok
+
+      }
+      #other severe errors (permissions, format..)
+      else{
+
+        confess $update_doc->errors()->[-1];
+
+      }
+
+    }
+    #no errors given: strange
+    else{
+      #when does this happen?
+      confess "how did you end up here?";
     }
 
   }
-
   #record is ALWAYS changed by Aleph, so fetch it again
   $self->get($data->{_id});
   
