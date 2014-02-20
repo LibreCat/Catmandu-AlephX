@@ -26,6 +26,9 @@ has ua => (
 sub request {
   my($self,$params,$method)=@_;
 
+  #default_args
+  $params = { %{ $self->default_args() }, %$params };
+
   $method ||= "GET";
   my $res;
   if(uc($method) eq "GET"){

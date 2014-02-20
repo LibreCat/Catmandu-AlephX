@@ -11,7 +11,12 @@ has url => (
   isa => sub { $_[0] =~ /^https?:\/\//o or die("url must be a valid web url\n"); },
   required => 1
 );
-
+has default_args => (
+  is => 'ro',
+  isa => sub { check_hash_ref($_[0]); },
+  lazy => 1,
+  default => sub { +{}; }
+);
 has ua => (
   is => 'ro',
   lazy => 1,
@@ -19,7 +24,7 @@ has ua => (
 );
 sub _build_ua {
   require Catmandu::AlephX::UserAgent::LWP;
-  Catmandu::AlephX::UserAgent::LWP->new(url => $_[0]->url());  
+  Catmandu::AlephX::UserAgent::LWP->new(url => $_[0]->url(),default_args => $_[0]->default_args());  
 }
 =head1 NAME
 
