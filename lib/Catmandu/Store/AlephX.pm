@@ -306,7 +306,9 @@ sub search {
         @results = map { $_->metadata->data; } @{ $present->records() } if $present->is_success;
   }
 
-  my $total = $find->no_records // 0;
+  my $total = $find->no_records;
+  $total = 0 unless defined $total && $total =~ /\d+/;
+ 
   Catmandu::Hits->new({
     limit => $limit,
     start => $start,
