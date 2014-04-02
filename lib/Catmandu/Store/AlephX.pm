@@ -310,7 +310,7 @@ sub search {
   Catmandu::Hits->new({
     limit => $limit,
     start => $start,
-    total => $total,
+    total => int($total),
     hits  => \@results,
   }); 
 }
