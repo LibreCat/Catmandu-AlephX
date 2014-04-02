@@ -289,29 +289,28 @@ sub search {
     base => $self->name,
     user_name => ""
   );
-  
-  return unless $find->is_success;
-
-  my $no_records = int($find->no_records);
-  my $no_entries = int($find->no_entries);
+ 
+  my @results = ();
+     
+  if ($find->is_success) {
+        my $no_records = int($find->no_records);
+        my $no_entries = int($find->no_entries);
     
-  my $s = sprintf("%-9.9d",$start + 1);
-  my $l = $start + $limit;
-  my $e = sprintf("%-9.9d",($l > $no_entries ? $no_entries : $l));
-  my $set_entry = "$s-$e";
+        my $s = sprintf("%-9.9d",$start + 1);
+        my $l = $start + $limit;
+        my $e = sprintf("%-9.9d",($l > $no_entries ? $no_entries : $l));
+        my $set_entry = "$s-$e";
 
-  my $present = $alephx->present(set_number => $find->set_number,set_entry => $set_entry,format => 'marc',user_name => "");
+        my $present = $alephx->present(set_number => $find->set_number,set_entry => $set_entry,format => 'marc',user_name => "");
 
-  return unless $present->is_success;
+        @results = map { $_->metadata->data; } @{ $present->records() } if $present->is_success;
+  }
 
-  my @results;
-
-  @results = map { $_->metadata->data; } @{ $present->records() };
-
-  my $hits = Catmandu::Hits->new({
+  my $total = $find->no_records // 0;
+  Catmandu::Hits->new({
     limit => $limit,
     start => $start,
-    total => $find->no_records,
+    total => $total,
     hits  => \@results,
   }); 
 }
