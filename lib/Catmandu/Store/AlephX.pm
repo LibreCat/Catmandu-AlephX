@@ -100,12 +100,18 @@ sub get {
 
   $find_doc->record->metadata->data;
 }
+
+
 =head2 add($catmandu_marc)
+
+Adds or updates a record to the Aleph database. Requires a Catmandu type MARC record and a _id field
+containing the Aleph record number. This method with throw an error when an add cant be executed.
 
 =head3 example
 
   #add new record. WARNING: Aleph will ignore the 001 field, 
-  my $new_record = $bag->add({
+  my $new_record = eval {
+    $bag->add({
     record =>  [
       [
         'FMT',
@@ -138,6 +144,12 @@ sub get {
       ..
     ]    
   });
+
+  };
+  if ($@) {
+    die "add failed $@";
+  }
+
   say "new record:".$record->{_id};
 
 =cut
