@@ -1,3 +1,5 @@
 /Catmandu-AlephX-*
 /.build
+/local
+/cpanfile.snapshot
 !META.json
