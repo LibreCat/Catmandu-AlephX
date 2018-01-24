@@ -499,6 +499,110 @@ The service creates a hold-request record (Z37) for a given item after performin
       say STDERR join("\n",@{$u->errors});
     }
 
+## create\_item
+
+### documentation from Aleph X
+
+The service creates a new item in the required ADM library after performing all relevant initial checks prior to that action.
+
+The item can be created for a bib record when no ADM record is linked to it yet, or it can be created to an ADM record with existing items.
+
+### notes
+
+### example
+
+    my $alephx = Catmandu::AlephX->new(url => "http://localhost/X");
+    my $item_barcode = '32044044980076';
+
+    my %args = (
+      'adm_library'    => 'rug50',
+      'bib_library'    => 'rug01',
+      'bib_doc_number' => '231843137',
+    );
+
+    my $xml = <<EOF;
+    <?xml version="1.0" encoding="UTF-8" ?>
+    <z30>
+    <z30-doc-number>15</z30-doc-number>
+    <z30-item-sequence>10</z30-item-sequence>
+    <z30-barcode>32044003924339</z30-barcode>
+    <z30-sub-library>WID</z30-sub-library>
+    <z30-material>BOOK</z30-material>
+    <z30-item-status>01</z30-item-status>
+    <z30-open-date>19980804</z30-open-date>
+    <z30-update-date>20020708</z30-update-date>
+    <z30-cataloger>EXLIBRIS</z30-cataloger>
+    <z30-date-last-return>20080607</z30-date-last-return>
+    <z30-hour-last-return>1631</z30-hour-last-return>
+    <z30-ip-last-return>CONV</z30-ip-last-return>
+    <z30-no-loans>011</z30-no-loans>
+    <z30-alpha>L</z30-alpha>
+    <z30-collection>GEN</z30-collection>
+    <z30-call-no-type>7</z30-call-no-type>
+    <z30-call-no>Heb 2106.385.5</z30-call-no>
+    <z30-call-no-key>7 selected</z30-call-no-key>
+    <z30-call-no-2-type />
+    <z30-call-no-2 />
+    <z30-call-no-2-key />
+    <z30-description>v.1</z30-description>
+    <z30-note-opac />
+    <z30-note-circulation />
+    <z30-note-internal />
+    <z30-order-number />
+    <z30-inventory-number />
+    <z30-inventory-number-date />
+    <z30-last-shelf-report-date>00000000</z30-last-shelf-report-date>
+    <z30-price />
+    <z30-shelf-report-number />
+    <z30-on-shelf-date>00000000</z30-on-shelf-date>
+    <z30-on-shelf-seq>000000</z30-on-shelf-seq>
+    <z30-doc-number-2>000000015</z30-doc-number-2>
+    <z30-schedule-sequence-2>00000</z30-schedule-sequence-2>
+    <z30-copy-sequence-2>00000</z30-copy-sequence-2>
+    <z30-vendor-code />
+    <z30-invoice-number />
+    <z30-line-number>00000</z30-line-number>
+    <z30-pages />
+    <z30-issue-date />
+    <z30-expected-arrival-date />
+    <z30-arrival-date />
+    <z30-item-statistic />
+    <z30-item-process-status>XX</z30-item-process-status>
+    <z30-copy-id>1</z30-copy-id>
+    <z30-hol-doc-number>000000046</z30-hol-doc-number>
+    <z30-temp-location>No</z30-temp-location>
+    <z30-enumeration-a />
+    <z30-enumeration-b />
+    <z30-enumeration-c />
+    <z30-enumeration-d />
+    <z30-enumeration-e />
+    <z30-enumeration-f />
+    <z30-enumeration-g />
+    <z30-enumeration-h />
+    <z30-chronological-i />
+    <z30-chronological-j />
+    <z30-chronological-k />
+    <z30-chronological-l />
+    <z30-chronological-m />
+    <z30-supp-index-o />
+    <z30-85x-type />
+    <z30-depository-id />
+    <z30-linking-number>000000000</z30-linking-number>
+    <z30-gap-indicator />
+    <z30-maintenance-count>007</z30-maintenance-count>
+    <z30-process-status-date>20080408</z30-process-status-date>
+    </z30>
+  EOF
+
+    $args{xml_full_req} = $xml;
+
+    my $u = alephx->create_item(%args);
+    if($u->is_success){
+      say "all ok";
+    }else{
+      say STDERR join("\n",@{$u->errors});
+    }
+
 # AUTHOR
 
 Nicolas Franck, `<nicolas.franck at ugent.be>`
