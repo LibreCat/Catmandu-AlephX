@@ -24,7 +24,7 @@ has ua => (
 );
 sub _build_ua {
   require Catmandu::AlephX::UserAgent::LWP;
-  Catmandu::AlephX::UserAgent::LWP->new(url => $_[0]->url(),default_args => $_[0]->default_args());  
+  Catmandu::AlephX::UserAgent::LWP->new(url => $_[0]->url(),default_args => $_[0]->default_args());
 }
 =head1 NAME
 
@@ -40,7 +40,7 @@ sub _build_ua {
   # 'is_success' means that the xml-response did not contain the element 'error'
   # most methods return only one 'error', but some (like update_doc) multiple.
   # other errors are thrown (xml parse error, no connection ..)
-  
+
 
   if($item_data->is_success){
 
@@ -55,9 +55,9 @@ sub _build_ua {
 =head1 METHODS
 
 =head2 item-data
- 
+
 =head3 documentation from AlephX
- 
+
 The service retrieves the document number from the user.
 For each of the document's items it retrieves:
   Item information (From Z30).
@@ -76,7 +76,7 @@ For each of the document's items it retrieves:
   }
 
 =head3 remarks
-  
+
   This method is equivalent to 'op' = 'item-data'
 
 =cut
@@ -85,12 +85,12 @@ sub item_data {
   require Catmandu::AlephX::Op::ItemData;
   $args{'op'} = Catmandu::AlephX::Op::ItemData->op();
   my $res = $self->ua->request(\%args);
-  Catmandu::AlephX::Op::ItemData->parse($res->content_ref(),\%args);    
+  Catmandu::AlephX::Op::ItemData->parse($res->content_ref(),\%args);
 }
 =head2 item-data-multi
- 
+
 =head3 documentation from AlephX
- 
+
 This service takes a document number from the user and for each of the document's items retrieves the following:
   Item information (from Z30)
   Loan information (from Z36)
@@ -111,7 +111,7 @@ It is similar to the item_data X-service, except for the parameter START_POINT, 
   say "items retrieved, starting at ".$item_data_m->start_point() if $item_data_m->start_point();
 
 =head3 remarks
-  
+
   This method is equivalent to 'op' = 'item-data-multi'
   The attribute 'start_point' only supplies a value, if the document has over 990 items
 
@@ -121,7 +121,7 @@ sub item_data_multi {
   require Catmandu::AlephX::Op::ItemDataMulti;
   $args{'op'} = Catmandu::AlephX::Op::ItemDataMulti->op();
   my $res = $self->ua->request(\%args);
-  Catmandu::AlephX::Op::ItemDataMulti->parse($res->content_ref(),\%args);    
+  Catmandu::AlephX::Op::ItemDataMulti->parse($res->content_ref(),\%args);
 }
 =head2 read_item
 
@@ -151,17 +151,17 @@ sub read_item {
   require Catmandu::AlephX::Op::ReadItem;
   $args{'op'} = Catmandu::AlephX::Op::ReadItem->op();
   my $res = $self->ua->request(\%args);
-  Catmandu::AlephX::Op::ReadItem->parse($res->content_ref(),\%args);    
+  Catmandu::AlephX::Op::ReadItem->parse($res->content_ref(),\%args);
 }
 
 =head2 find
 
 =head3 documentation from Aleph X
-  
+
   This service retrieves a set number and the number of records answering a search request inserted by the user.
 
 =head3 example
-  
+
   my $find = $aleph->find(request => 'wrd=(art)',base=>'rug01');
   if($find->is_success){
     say "set_number: ".$find->set_number;
@@ -185,13 +185,13 @@ sub find {
   require Catmandu::AlephX::Op::Find;
   $args{'op'} = Catmandu::AlephX::Op::Find->op();
   my $res = $self->ua->request(\%args);
-  Catmandu::AlephX::Op::Find->parse($res->content_ref(),\%args);    
+  Catmandu::AlephX::Op::Find->parse($res->content_ref(),\%args);
 }
 
 =head2 find_doc
 
 =head3 documentation from AlephX
-  
+
   This service retrieves the OAI XML format of an expanded document as given by the user.
 
 =head3 example
@@ -213,7 +213,7 @@ sub find_doc {
   require Catmandu::AlephX::Op::FindDoc;
   $args{'op'} = Catmandu::AlephX::Op::FindDoc->op();
   my $res = $self->ua->request(\%args);
-  Catmandu::AlephX::Op::FindDoc->parse($res->content_ref(),\%args);    
+  Catmandu::AlephX::Op::FindDoc->parse($res->content_ref(),\%args);
 }
 
 =head2 present
@@ -249,7 +249,7 @@ sub present {
   require Catmandu::AlephX::Op::Present;
   $args{'op'} = Catmandu::AlephX::Op::Present->op();
   my $res = $self->ua->request(\%args);
-  Catmandu::AlephX::Op::Present->parse($res->content_ref(),\%args);    
+  Catmandu::AlephX::Op::Present->parse($res->content_ref(),\%args);
 }
 
 =head2 ill_get_doc_short
@@ -275,11 +275,11 @@ sub present {
 
 =cut
 sub ill_get_doc_short {
-  my($self,%args)=@_; 
+  my($self,%args)=@_;
   require Catmandu::AlephX::Op::IllGetDocShort;
   $args{'op'} = Catmandu::AlephX::Op::IllGetDocShort->op();
   my $res = $self->ua->request(\%args);
-  Catmandu::AlephX::Op::IllGetDocShort->parse($res->content_ref(),\%args);    
+  Catmandu::AlephX::Op::IllGetDocShort->parse($res->content_ref(),\%args);
 }
 =head2 bor_auth
 
@@ -319,7 +319,7 @@ sub bor_auth {
   $args{'op'} = Catmandu::AlephX::Op::BorAuth->op();
   my $res = $self->ua->request(\%args);
   Catmandu::AlephX::Op::BorAuth->parse($res->content_ref(),\%args);
-} 
+}
 =head2 bor_info
 
 =head3 documentation from Aleph X
@@ -329,7 +329,7 @@ sub bor_auth {
   If not, an error message is returned. Since the bor-info X-Service retrieves a very large amount of data, and not all of it may be relevant, you can choose to receive a part of the data, based on your needs.
 
 =head3 example
-    
+
   my %args = (
     library => $library,
     bor_id => $bor_id,
@@ -444,7 +444,7 @@ sub circ_stat_m {
 
 This service supplies the current availability status of a document.
 
-The X-Server does not change any data.  
+The X-Server does not change any data.
 
 =head3 example
 
@@ -590,16 +590,16 @@ sub user_auth {
   "Unlike other X-Services, the parameters can include XML up to 20,000 characters in length"
 
   When you update often (and therefore add a lot of CAT fields), this can lead to the error 'Server closed connection'.
-  This is due to the maximum of characters allowed in an XML request. 
+  This is due to the maximum of characters allowed in an XML request.
 
-  Possible solution: 
+  Possible solution:
     1. retrieve record by 'find_doc'
-    2. get marc record: 
+    2. get marc record:
 
         my $marc = $res->record->metadata->data
 
     3. filter out your CAT fields ($a == "WWW-X") to shorten the XML:
-        
+
         $marc = [grep { !( $_->[0] eq "CAT" && $_->[4] eq "WWW-X" ) } @$marc];
 
     4. update $marc
@@ -691,9 +691,9 @@ EOF
   Search for the last 'error', and check wether it contains 'updated successfully'.
 
   The result of 'read_item' often contains translations, instead of the real values. But these
-  translation cannot be used when updating items. 
+  translation cannot be used when updating items.
 
-  e.g. z30-item-status contains 'Regular loan' instead of '001'. 
+  e.g. z30-item-status contains 'Regular loan' instead of '001'.
 
 =head3 example
 
@@ -705,10 +705,10 @@ EOF
     'item_barcode' => $item_barcode,
   );
 
-  my $z30 = $alephx->read_item(%args)->z30(); 
+  my $z30 = $alephx->read_item(%args)->z30();
 
   my $xml = XMLout($z30,,RootName=>"z30",NoAttr => 1);
-  $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n".$xml; 
+  $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n".$xml;
 
   $args{xml_full_req} = $xml;
 
@@ -717,7 +717,7 @@ EOF
     say "all ok";
   }else{
     say STDERR join("\n",@{$u->errors});
-  } 
+  }
 
 =cut
 
@@ -747,7 +747,7 @@ This program is free software; you can redistribute it and/or modify it
 under the terms of either: the GNU General Public License as published
 by the Free Software Foundation; or the Artistic License.
 
-See http://dev.perl.org/licenses/ for more information.
+See L<http://dev.perl.org/licenses/> for more information.
 
 =cut
 1;
