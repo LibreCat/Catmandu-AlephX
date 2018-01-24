@@ -11,10 +11,6 @@ on 'test', sub {
   requires 'Test::Pod', 0;
 };
 
-on 'develop', sub {
-
-};
-
 requires 'Carp', '0';
 requires 'Catmandu', '0';
 requires 'Data::Util', '0';
