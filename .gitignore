@@ -1,7 +1,3 @@
-_build/
-blib/
-Build
-MYMETA.*
-.DS_Store
-*.bak
-test
+/Catmandu-AlephX-*
+/.build
+!META.json
