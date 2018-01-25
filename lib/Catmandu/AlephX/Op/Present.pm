@@ -5,7 +5,7 @@ use Moo;
 use Catmandu::AlephX::Metadata::MARC::Aleph;
 use Catmandu::AlephX::Record::Present;
 
-our $VERSION = "1.065";
+our $VERSION = "1.07";
 
 with('Catmandu::AlephX::Response');
 

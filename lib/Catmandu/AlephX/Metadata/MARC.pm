@@ -3,7 +3,7 @@ use Catmandu::Sane;
 use Moo;
 extends qw(Catmandu::AlephX::Metadata);
 
-our $VERSION = "1.065";
+our $VERSION = "1.07";
 
 #parse marcxml into Catmandu marc array
 

@@ -19,7 +19,7 @@ use Catmandu::Util qw(:is :check);
 use Catmandu::AlephX;
 use Moo;
 
-our $VERSION = "1.065";
+our $VERSION = "1.07";
 
 with 'Catmandu::Store';
 

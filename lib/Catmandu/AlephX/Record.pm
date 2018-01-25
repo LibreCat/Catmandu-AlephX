@@ -4,7 +4,7 @@ use Catmandu::Util qw(:is :check);
 use Moo;
 use Catmandu::AlephX::Metadata;
 
-our $VERSION = "1.065";
+our $VERSION = "1.07";
 
 has metadata => (
   is => 'ro',

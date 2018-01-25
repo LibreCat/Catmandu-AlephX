@@ -6,7 +6,7 @@ use LWP::UserAgent;
 use URI::Escape;
 use Catmandu::Util qw(:check :is);
 
-our $VERSION = "1.065";
+our $VERSION = "1.07";
 
 with qw(Catmandu::AlephX::UserAgent);
 

@@ -2,7 +2,7 @@ package Catmandu::AlephX::Record::Present;
 use Catmandu::Sane;
 use Moo;
 
-our $VERSION = "1.065";
+our $VERSION = "1.07";
 
 extends 'Catmandu::AlephX::Record';
 
