@@ -114,11 +114,7 @@ sub get {
 
   my $doc = $find_doc->record->metadata->data;
 
-<<<<<<< HEAD
-  return undef if $self->store->deleted && check_deleted($doc);
-=======
   return undef if $self->store->skip_deleted && check_deleted($doc);
->>>>>>> dev
 
   return $doc;
 }
@@ -309,11 +305,7 @@ sub generator {
             record => $find_doc->record->metadata->data->{record},
             _id => $doc_num
         };
-<<<<<<< HEAD
-    } while ($self->store->deleted && check_deleted($doc) == 1);
-=======
     } while ($self->store->skip_deleted && check_deleted($doc) == 1);
->>>>>>> dev
 
     return $doc;
   };
