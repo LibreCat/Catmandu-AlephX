@@ -26,11 +26,7 @@ with 'Catmandu::Store';
 has url => (is => 'ro', required => 1);
 has username => ( is => 'ro' );
 has password => ( is => 'ro' );
-<<<<<<< HEAD
-has deleted => ( is => 'ro' , default => sub { 0 } );
-=======
 has skip_deleted => ( is => 'ro' , default => sub { 0 } );
->>>>>>> dev
 
 has alephx => (
   is       => 'ro',
