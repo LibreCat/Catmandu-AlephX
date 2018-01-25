@@ -1,6 +1,5 @@
-_build/
-blib/
-Build
-MYMETA.*
-.DS_Store
-*.bak
+/Catmandu-AlephX-*
+/.build
+/local
+/cpanfile.snapshot
+!META.json

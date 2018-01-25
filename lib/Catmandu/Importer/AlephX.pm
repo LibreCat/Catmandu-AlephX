@@ -7,11 +7,12 @@ use Data::Dumper;
 
 with 'Catmandu::Importer';
 
-our $VERSION = '0.02';
+our $VERSION = "1.065";
 
 has url     => (is => 'ro', required => 1);
 has base    => (is => 'ro', required => 1);
 has query   => (is => 'ro' );
+has skip_deleted => (is => 'ro', default => sub { 0 });
 has include_items => (is => 'ro',required => 0,lazy => 1,default => sub { 1; });
 has limit => (
   is => 'ro',
@@ -28,9 +29,18 @@ sub _build_alephx {
 sub _fetch_items {
   my ($self, $doc_number) = @_;
   my $item_data = $self->alephx->item_data(base => $self->base, doc_number => $doc_number);
-  
+
   return [] unless $item_data->is_success;
   return $item_data->items;
+}
+
+sub check_deleted {
+    my $r = $_[0];
+    return 1 unless defined $r;
+    for (@{$r->{record}}) {
+        return 1 if ($_->[0] eq 'DEL');
+    }
+    return 0;
 }
 
 sub generator {
@@ -51,7 +61,7 @@ sub generator {
 
       #warning: no_records is the number of records found, but only no_entries are stored in the set.
       #         a call to 'present' with set_number higher than no_entries has no use.
-     
+
       state $offset = 1;
       state $limit = $self->limit;
 
@@ -61,12 +71,12 @@ sub generator {
 
         my $set_entry;
         {
-          my $start = sprintf("%-9.9d",$offset);
+          my $start = Catmandu::AlephX->format_doc_num($offset);
           my $l = $offset + $limit - 1;
-          my $end = sprintf("%-9.9d",($l > $no_entries ? $no_entries : $l));
-          $set_entry = "$start-$end";        
+          my $end = Catmandu::AlephX->format_doc_num($l > $no_entries ? $no_entries : $l);
+          $set_entry = "$start-$end";
         }
-        
+
         my $present = $self->alephx->present(set_number => $set_number , set_entry => $set_entry);
         return unless $present->is_success;
 
@@ -96,24 +106,30 @@ sub generator {
 
       state $count = 1;
       state $alephx = $self->alephx;
-    
-      my $doc_num = sprintf("%-9.9d",$count++);     
-      my $find_doc = $alephx->find_doc(base => $self->base,doc_num => $doc_num);
-      
-      return unless $find_doc->is_success;
 
-      my $items = [];
-      if($self->include_items){
-        $items = $self->_fetch_items($doc_num);
-      }
+      my $doc;
 
-      return {
-        record => $find_doc->record->metadata->data->{record},
-        items => $items,
-        #do NOT use $record->metadata->data->{_id}, for that uses the field '001' that can be empty
-        _id => $doc_num
-      };
-      
+      do {
+        my $doc_num = Catmandu::AlephX->format_doc_num($count++);
+        my $find_doc = $alephx->find_doc(base => $self->base,doc_num => $doc_num);
+
+        return unless $find_doc->is_success;
+
+        my $items = [];
+
+        if($self->include_items){
+            $items = $self->_fetch_items($doc_num);
+        }
+
+        $doc = {
+            record => $find_doc->record->metadata->data->{record},
+            items => $items,
+            #do NOT use $record->metadata->data->{_id}, for that uses the field '001' that can be empty
+            _id => $doc_num
+        };
+      } while ($self->skip_deleted && check_deleted($doc) == 1);
+
+      return $doc;
     };
   }
 }
@@ -149,10 +165,10 @@ Create a new AlephX importer. Required parameters are the url baseUrl of the Ale
 
     url             base url of alephx service (e.g. "http://ram19:8995/X")
     include_items   0|1. When set to '1', the items of every bibliographical record  are retrieved
-    
+
 =head3 alephx parameters
 
-    base    name of catalog in Aleph where you want to search    
+    base    name of catalog in Aleph where you want to search
     query   the query of course
 
 =head3 output
