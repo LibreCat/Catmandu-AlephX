@@ -11,6 +11,8 @@ on 'test', sub {
   requires 'Test::Pod', 0;
 };
 
+requires 'Clone', '0';
+requires 'namespace::clean', '0';
 requires 'Carp', '0';
 requires 'Catmandu', '0';
 requires 'Data::Util', '0';
