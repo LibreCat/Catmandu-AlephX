@@ -2,7 +2,7 @@ package Catmandu::AlephX::Op::Find;
 use Catmandu::Sane;
 use Moo;
 
-our $VERSION = "1.07";
+our $VERSION = "1.071";
 
 with('Catmandu::AlephX::Response');
 
