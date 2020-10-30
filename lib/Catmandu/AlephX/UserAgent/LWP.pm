@@ -47,7 +47,7 @@ sub request {
 
 sub _validate_web_response {
   my($res) = @_;
-  $res->is_error && confess($res->content);
+  ($res->is_error || $res->content_type !~ /xml/io) && confess($res->content);
 }
 sub _post {
   my($self,$data)=@_;
