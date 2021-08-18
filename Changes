@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+1.073  2021-08-18 16:05:03 CEST
    - fix empty response giving an exception for hold-req and read-item on error
 
 1.072  2020-10-30 09:24:45 CET
