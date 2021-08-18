@@ -37,4 +37,9 @@ sub parse {
   );
 }
 
+sub parse_errors {
+  my($self,$xpath)=@_;
+  [map { $_->to_literal; } $xpath->find("/ill-LOAN-INFO/error|/ill-loan-info/error")->get_nodelist()];
+}
+
 1;
