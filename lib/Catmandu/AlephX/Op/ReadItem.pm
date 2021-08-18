@@ -34,7 +34,7 @@ sub parse {
   __PACKAGE__->new(
     session_id => $xpath->findvalue("/$op/session-id"),
     errors => $class->parse_errors($xpath),
-    z30 => $z30[0],
+    z30 => $z30[0] // +{},
     content_ref => $str_ref
   );
 }

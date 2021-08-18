@@ -35,7 +35,7 @@ sub parse {
     session_id => $xpath->findvalue('/'.$op.'/session-id'),
     errors => $class->parse_errors($xpath),
     content_ref => $str_ref,
-    z30 => $z30[0]
+    z30 => $z30[0] // +{}
   );
 }
 
