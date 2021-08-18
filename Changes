@@ -1,4 +1,5 @@
 Revision history for Catmandu::AlephX
+  - fix empty response giving an exception for hold-req and read-item on error
 
 {{$NEXT}}
 
