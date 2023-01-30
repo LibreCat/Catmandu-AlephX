@@ -389,7 +389,7 @@ The service creates a hold-request record (Z37) for a given item after performin
     This happens because AlephX performs an 'UPDATE-CHK' before trying to execute an 'UPDATE',
     and stores all warnings during that check in the xml attribute 'error'.
 
-    Therefore the method 'is_success' of the Catmandu::AlephX::Response is not very usefull in this case.
+    Therefore the method 'is_success' of the Catmandu::AlephX::Response is not very useful in this case.
     Search for the last 'error', and check wether it contains 'updated successfully'.
 
 ### warnings
@@ -467,7 +467,7 @@ The service creates a hold-request record (Z37) for a given item after performin
 
     AlephX stores not only errors in 'errors', but also the success message.
 
-    Therefore the method 'is_success' of the Catmandu::AlephX::Response is not very usefull in this case.
+    Therefore the method 'is_success' of the Catmandu::AlephX::Response is not very useful in this case.
     Search for the last 'error', and check wether it contains 'updated successfully'.
 
     The result of 'read_item' often contains translations, instead of the real values. But these
