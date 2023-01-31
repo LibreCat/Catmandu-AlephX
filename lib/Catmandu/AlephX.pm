@@ -572,8 +572,8 @@ sub user_auth {
   This happens because AlephX performs an 'UPDATE-CHK' before trying to execute an 'UPDATE',
   and stores all warnings during that check in the xml attribute 'error'.
 
-  Therefore the method 'is_success' of the Catmandu::AlephX::Response is not very usefull in this case.
-  Search for the last 'error', and check wether it contains 'updated successfully'.
+  Therefore the method 'is_success' of the Catmandu::AlephX::Response is not very useful in this case.
+  Search for the last 'error', and check weather it contains 'updated successfully'.
 
 =head3 warnings
 
@@ -687,8 +687,8 @@ EOF
 
   AlephX stores not only errors in 'errors', but also the success message.
 
-  Therefore the method 'is_success' of the Catmandu::AlephX::Response is not very usefull in this case.
-  Search for the last 'error', and check wether it contains 'updated successfully'.
+  Therefore the method 'is_success' of the Catmandu::AlephX::Response is not very useful in this case.
+  Search for the last 'error', and check weather it contains 'updated successfully'.
 
   The result of 'read_item' often contains translations, instead of the real values. But these
   translation cannot be used when updating items.
